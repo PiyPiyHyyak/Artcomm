@@ -584,26 +584,35 @@ function normalizeTrustedPartners(content) {
   }
 
   const partners = content.home && content.home.trustedPartners;
-  if (!Array.isArray(partners)) {
-    return false;
+  let changed = false;
+
+  if (Array.isArray(partners)) {
+    content.home.trustedPartners = partners.map((item) => {
+      if (!item || typeof item !== "object") {
+        return item;
+      }
+
+      if (String(item.logo || "").trim() === "/assets/logos/rosatom-white.png") {
+        changed = true;
+        return {
+          ...item,
+          logo: "/assets/logos/rosatom.png"
+        };
+      }
+
+      return item;
+    });
   }
 
-  let changed = false;
-  content.home.trustedPartners = partners.map((item) => {
-    if (!item || typeof item !== "object") {
-      return item;
-    }
-
-    if (String(item.logo || "").trim() === "/assets/logos/rosatom.png") {
-      changed = true;
-      return {
-        ...item,
-        logo: "/assets/logos/rosatom-white.png"
-      };
-    }
-
-    return item;
-  });
+  const trustedSubtitle = content.home?.contactsSection?.trustedSubtitle;
+  const legacySubtitle = "Работаем более чем в 40 городах — от распределённых команд до отраслевых управленческих контуров.";
+  const previousSubtitle = "Сопровождаем управленческие команды и проекты в 40+ городах России.";
+  const previousSubtitleNbsp = "Сопровождаем управленческие команды и проекты в 40+\u00A0городах России.";
+  const nextSubtitle = "Сопровождаем управленческие команды и проекты более чем в 40 городах России.";
+  if ((trustedSubtitle === legacySubtitle || trustedSubtitle === previousSubtitle || trustedSubtitle === previousSubtitleNbsp) && content.home?.contactsSection) {
+    content.home.contactsSection.trustedSubtitle = nextSubtitle;
+    changed = true;
+  }
 
   return changed;
 }
@@ -673,12 +682,20 @@ function normalizeMediaStationReviewsModal(content) {
     const cleanedBodyHtml = rawBodyHtml
       .replace(/<div class=["']modal-review-media["'][^>]*>\s*<img[^>]*src=["']\/assets\/reviews\/[^"']+\.svg["'][^>]*>\s*<\/div>\s*/gi, "")
       .replace(/<div class=["']modal-review-media["'][^>]*>\s*<div class=["']modal-review-avatar-empty["'][\s\S]*?<\/div>\s*<\/div>\s*/gi, "");
+    const normalizedCardsBodyHtml = cleanedBodyHtml.replace(
+      /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
+      (match, innerHtml) => {
+        const hasRealImage = /<div class=["']modal-review-media["'][^>]*>\s*<img\b/i.test(innerHtml);
+        return `<article class="modal-review-card${hasRealImage ? " has-media" : ""}">${innerHtml}</article>`;
+      }
+    );
     const rawTitle = String(entry.title || "").trim();
     const needsBodyUpgrade = !rawBodyHtml.includes("modal-review-card");
     const needsPlaceholderCleanup = cleanedBodyHtml !== rawBodyHtml;
+    const needsCardNormalization = normalizedCardsBodyHtml !== cleanedBodyHtml;
     const needsTitleUpgrade = rawTitle === "Участники о проекте" || rawTitle === "Отзывы участников";
 
-    if (!needsBodyUpgrade && !needsTitleUpgrade && !needsPlaceholderCleanup) {
+    if (!needsBodyUpgrade && !needsTitleUpgrade && !needsPlaceholderCleanup && !needsCardNormalization) {
       return entry;
     }
 
@@ -686,7 +703,7 @@ function normalizeMediaStationReviewsModal(content) {
     return {
       ...entry,
       title: needsTitleUpgrade ? defaultReviewsEntry.title : entry.title,
-      bodyHtml: needsBodyUpgrade ? defaultReviewsEntry.bodyHtml : cleanedBodyHtml
+      bodyHtml: needsBodyUpgrade ? defaultReviewsEntry.bodyHtml : normalizedCardsBodyHtml
     };
   });
 

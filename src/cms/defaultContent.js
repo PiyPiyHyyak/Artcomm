@@ -96,7 +96,7 @@ export const DEFAULT_CONTENT = {
       maxUrl: "https://max.ru"
     },
     trustedPartners: [
-      { id: "trusted-1", name: "Росатом", logo: "/assets/logos/rosatom-white.png", x: 13, y: 16, range: 42, isPublished: true },
+      { id: "trusted-1", name: "Росатом", logo: "/assets/logos/rosatom.png", x: 13, y: 16, range: 42, isPublished: true },
       { id: "trusted-2", name: "Знание", logo: "/assets/logos/znanie.png", x: 34, y: 14, range: 40, isPublished: true },
       { id: "trusted-3", name: "Сенеж", logo: "/assets/logos/senezh.png", x: 56, y: 22, range: 38, isPublished: true },
       { id: "trusted-4", name: "АСИ", logo: "/assets/logos/asi.png", x: 79, y: 18, range: 44, isPublished: true },
@@ -130,10 +130,10 @@ export const DEFAULT_CONTENT = {
       title: "Индекс коммуникационной состоятельности",
       description: "Переводим коммуникации из «ощущений» в управляемую систему, чтобы команда видела сильные стороны и точки ускорения решений.",
       pillars: [
-        { id: "pillar-1", key: "Организация и процессы", title: "Организация и процессы", text: "Насколько чётко распределены процессы, ответственность и ритм решений.", isPublished: true },
-        { id: "pillar-2", key: "Компетенции и роли", title: "Компетенции и роли", text: "Готовность ролей к диалогу, фасилитации и управлению сложными стыками.", isPublished: true },
-        { id: "pillar-3", key: "Контент и производство", title: "Контент и производство", text: "Качество смыслов и единый язык, который доходит до исполнения.", isPublished: true },
-        { id: "pillar-4", key: "Охват и каналы", title: "Охват и каналы", text: "Плотность каналов и глубина включения команды в общий контур коммуникаций.", isPublished: true }
+        { id: "pillar-1", key: "Организация и процессы", title: "Организация и процессы", text: "", isPublished: true },
+        { id: "pillar-2", key: "Компетенции и роли", title: "Компетенции и роли", text: "", isPublished: true },
+        { id: "pillar-3", key: "Контент и производство", title: "Контент и производство", text: "", isPublished: true },
+        { id: "pillar-4", key: "Охват и каналы", title: "Охват и каналы", text: "", isPublished: true }
       ],
       actions: [
         { id: "iks-action-1", label: "Форматы работы", type: "modal", target: "formats", variant: "primary", isPublished: true },
@@ -143,7 +143,7 @@ export const DEFAULT_CONTENT = {
     expert: {
       kicker: "Наши эксперты",
       title: "Роман Скудняков",
-      quote: "«Управляемость команды начинается с того, как она разговаривает и как принимает решения».",
+      quote: "«Управляемость команды начинается с того, как она разговаривает и как принимает решения»",
       brief: "Стратегический коммуникатор и модератор управленческих команд в сложных распределённых структурах.",
       photos: [
         { id: "expert-photo-1", image: "/assets/expert-1.jpg", alt: "Эксперт проекта Роман Скудняков", isPublished: true },
@@ -160,8 +160,8 @@ export const DEFAULT_CONTENT = {
       impactPrimaryLabel: "лет",
       impactSecondaryText: "1000+ проектов",
       actions: [
-        { id: "expert-action-1", label: "Команда Арткомм", type: "modal", target: "team", variant: "primary", isPublished: true },
-        { id: "expert-action-2", label: "Профессиональные награды", type: "modal", target: "awards", variant: "secondary", isPublished: true }
+        { id: "expert-action-1", label: "Профессиональные награды", type: "modal", target: "awards", variant: "primary", isPublished: true },
+        { id: "expert-action-2", label: "Команда Арткомм", type: "modal", target: "team", variant: "secondary", isPublished: true }
       ]
     },
     contactsSection: {
@@ -179,7 +179,7 @@ export const DEFAULT_CONTENT = {
       newsLink: "/privacy#marketing-consent",
       submitLabel: "Отправить",
       trustedTitle: "Нам доверяют",
-      trustedSubtitle: "Работаем более чем в 40 городах — от распределённых команд до отраслевых управленческих контуров."
+      trustedSubtitle: "Сопровождаем управленческие команды и проекты более чем в 40 городах России."
     }
   },
   projects: {
@@ -236,33 +236,24 @@ export const DEFAULT_CONTENT = {
       bodyHtml: String.raw`
         <div class="modal-review-list">
           <article class="modal-review-card">
-            <div class="modal-review-media">
-              <div class="modal-review-avatar-empty" aria-hidden="true">ОП</div>
-            </div>
             <div class="modal-review-copy">
               <h4>Ольга Петрова</h4>
               <p class="modal-review-meta">Заместитель министра науки РФ</p>
-              <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия.»</p>
+              <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
             </div>
           </article>
           <article class="modal-review-card">
-            <div class="modal-review-media">
-              <div class="modal-review-avatar-empty" aria-hidden="true">ЕС</div>
-            </div>
             <div class="modal-review-copy">
               <h4>Елена Светлова</h4>
               <p class="modal-review-meta">Озёрск</p>
-              <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели.»</p>
+              <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
             </div>
           </article>
           <article class="modal-review-card">
-            <div class="modal-review-media">
-              <div class="modal-review-avatar-empty" aria-hidden="true">УР</div>
-            </div>
             <div class="modal-review-copy">
               <h4>Ульяна Реброва</h4>
               <p class="modal-review-meta">Полярные Зори</p>
-              <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов.»</p>
+              <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»</p>
             </div>
           </article>
         </div>

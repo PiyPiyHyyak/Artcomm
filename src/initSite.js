@@ -122,15 +122,19 @@ export default function initSite() {
   let msVideoViewportTicking = false;
   const testApi = mountProblemTest({
     questionWrap: $("#testQuestionWrap"),
+    stepMeta: $("#testStepMeta"),
     progressBar: $("#testProgressBar"),
     nextButton: $("#testNext"),
     backButton: $("#testBack"),
     resultNode: $("#testResult"),
-    onDiscuss: function () {
-      closeModal();
-      setTimeout(function () {
-        scrollToTarget("#contacts");
-      }, 220);
+    showInlineResult: true,
+    onShowFormat: function ({ recommendation }) {
+      if (recommendation?.key) {
+        document.body.setAttribute("data-formats-recommendation", recommendation.key);
+      } else {
+        document.body.removeAttribute("data-formats-recommendation");
+      }
+      openModal("formats");
     }
   });
 
@@ -161,12 +165,20 @@ export default function initSite() {
       return;
     }
 
-    const headerOffset = siteHeader ? siteHeader.offsetHeight : 0;
-    const y = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+    const getTargetOffset = () => {
+      const headerOffset = siteHeader ? siteHeader.offsetHeight : 0;
+      if (targetSelector === "#contactsAnchor") {
+        return headerOffset + (window.innerWidth <= 900 ? 8 : 12);
+      }
+      return headerOffset;
+    };
+
+    const y = target.getBoundingClientRect().top + window.pageYOffset - getTargetOffset();
     const scrollSequence = ++anchorScrollSequence;
 
     window.scrollTo({ top: y, behavior: "smooth" });
 
+    const settleStartedAt = Date.now();
     const settle = () => {
       if (scrollSequence !== anchorScrollSequence) {
         return;
@@ -177,8 +189,7 @@ export default function initSite() {
         return;
       }
 
-      const currentHeaderOffset = siteHeader ? siteHeader.offsetHeight : 0;
-      const delta = Math.round(currentTarget.getBoundingClientRect().top - currentHeaderOffset);
+      const delta = Math.round(currentTarget.getBoundingClientRect().top - getTargetOffset());
       if (Math.abs(delta) <= 1) {
         return;
       }
@@ -188,10 +199,15 @@ export default function initSite() {
       html.style.scrollBehavior = "auto";
       window.scrollTo({ top: window.pageYOffset + delta, behavior: "auto" });
       html.style.scrollBehavior = previousScrollBehavior;
+
+      if (Date.now() - settleStartedAt < 2800) {
+        window.setTimeout(settle, 180);
+      }
     };
 
-    window.setTimeout(settle, 1600);
-    window.setTimeout(settle, 2400);
+    window.setTimeout(settle, 240);
+    window.setTimeout(settle, 900);
+    window.setTimeout(settle, 1800);
   }
 
   function applyPendingCrossPageScroll() {
@@ -558,9 +574,11 @@ export default function initSite() {
     if (scrollRange <= 0) {
       applyCommonDrumState(0, true);
       setCommonArrowProgress(0);
-      setCommonMenProgress(0);
+      setCommonMenProgress(1);
       return;
     }
+
+    setCommonMenProgress(1);
 
     const anchorRect = commonSection.getBoundingClientRect();
     const traveled = Math.min(Math.max(headerOffset - anchorRect.top, 0), scrollRange);
@@ -577,20 +595,17 @@ export default function initSite() {
       const activeIndex = Math.min(commonDrumItems.length - 1, Math.max(0, phase - 1));
       applyCommonDrumState(activeIndex, isCollapsed);
       setCommonArrowProgress(0);
-      setCommonMenProgress(0);
       return;
     }
 
     if (phaseFloat < drumPhaseCount + arrowPhaseCount) {
       applyCommonDrumState(commonDrumItems.length - 1, true);
       setCommonArrowProgress(phaseFloat - drumPhaseCount);
-      setCommonMenProgress(0);
       return;
     }
 
     applyCommonDrumState(commonDrumItems.length - 1, true);
     setCommonArrowProgress(1);
-    setCommonMenProgress(phaseFloat - drumPhaseCount - arrowPhaseCount);
   }
 
   function handleCommonDrumScroll() {

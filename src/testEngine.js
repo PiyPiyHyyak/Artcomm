@@ -12,6 +12,7 @@ const TEST_STEPS = [
     id: "problems",
     type: "multi",
     title: "Какие проблемы беспокоят?",
+    hint: "Выберите все актуальные для вас ответы",
     options: [
       {
         text: "Сильная команда — слабая управляемость. Решения есть, но теряются на стыках подразделений.",
@@ -86,7 +87,16 @@ function createOptionButton({ text, selected, onClick }) {
   return optionButton;
 }
 
-export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButton, backButton, resultNode, onShowFormat }) {
+export function mountProblemTest({
+  questionWrap,
+  stepMeta,
+  progressBar,
+  nextButton,
+  backButton,
+  resultNode,
+  onShowFormat,
+  showInlineResult = true
+}) {
   if (!questionWrap || !progressBar || !nextButton || !backButton || !resultNode) {
     return null;
   }
@@ -96,6 +106,7 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
 
   const state = {
     index: 0,
+    view: "question",
     answers: {
       profile: "",
       problems: []
@@ -123,7 +134,7 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
     }
     backButton.disabled = state.index === 0;
     nextButton.disabled = !isCurrentStepValid();
-    nextButton.textContent = state.index === TEST_STEPS.length - 1 ? "Показать результат" : "Далее";
+    nextButton.textContent = state.index === TEST_STEPS.length - 1 ? "Показать форматы" : "Далее";
     backButton.hidden = false;
     nextButton.hidden = false;
   }
@@ -138,12 +149,21 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
     resultNode.hidden = true;
     resultNode.innerHTML = "";
     questionWrap.innerHTML = "";
+    state.view = "question";
     stageRoot?.classList.remove("is-result-view");
     shellRoot?.classList.remove("is-result-view");
+    stageRoot?.setAttribute("data-test-step", step.id);
+    stageRoot?.setAttribute("data-test-kind", step.type);
 
     const title = document.createElement("p");
     title.className = "test-question";
     title.textContent = step.title;
+
+    const hint = step.hint ? document.createElement("p") : null;
+    if (hint) {
+      hint.className = "test-question-hint";
+      hint.textContent = step.hint;
+    }
 
     const optionsWrap = document.createElement("div");
     optionsWrap.className = "test-options";
@@ -173,6 +193,9 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
     });
 
     questionWrap.appendChild(title);
+    if (hint) {
+      questionWrap.appendChild(hint);
+    }
     questionWrap.appendChild(optionsWrap);
     syncStepUi();
   }
@@ -188,46 +211,42 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
 
   function renderResult() {
     const recommendation = getRecommendation(state.answers.problems.length);
-    const profileLabel = state.answers.profile === "government" ? "органа власти" : "корпорации";
 
     questionWrap.hidden = true;
     resultNode.hidden = false;
     resultNode.innerHTML = "";
+    state.view = "result";
     stageRoot?.classList.add("is-result-view");
     shellRoot?.classList.add("is-result-view");
+    stageRoot?.setAttribute("data-test-step", "result");
+    stageRoot?.setAttribute("data-test-kind", "result");
     progressBar.style.width = "100%";
     if (stepMeta) {
-      stepMeta.textContent = "Результат";
+      stepMeta.textContent = "Тест завершён";
     }
 
     const kicker = document.createElement("p");
     kicker.className = "test-result-kicker";
-    kicker.textContent = "Рекомендуемый формат";
+    kicker.textContent = "Тест завершён";
 
     const title = document.createElement("h3");
-    title.textContent = recommendation.title;
+    title.textContent = "Форматы, которые подойдут вашей команде";
 
-    const duration = document.createElement("p");
-    duration.className = "test-result-meta";
-    duration.textContent = `${recommendation.duration} · ${profileLabel}`;
+    const resultLead = document.createElement("p");
+    resultLead.className = "test-result-meta";
+    resultLead.textContent = "Мы уже отметили наиболее подходящий вариант в подборке.";
 
     const summary = document.createElement("p");
     summary.className = "test-result-note";
-    summary.textContent = "Сейчас этот формат лучше всего подходит под отмеченные вами запросы и поможет быстрее собрать команду в рабочий ритм.";
+    summary.textContent = "Откройте форматы, чтобы спокойно сравнить все варианты, или пройдите тест заново, если хотите изменить ответы.";
 
     const actions = document.createElement("div");
     actions.className = "test-result-actions";
 
-    const restartButton = document.createElement("button");
-    restartButton.type = "button";
-    restartButton.className = "btn btn-secondary";
-    restartButton.textContent = "Пройти тест заново";
-    restartButton.addEventListener("click", reset);
-
     const formatButton = document.createElement("button");
     formatButton.type = "button";
     formatButton.className = "btn btn-primary";
-    formatButton.textContent = "Посмотреть формат";
+    formatButton.textContent = "Посмотреть форматы";
     formatButton.addEventListener("click", () => {
       if (typeof onShowFormat === "function") {
         onShowFormat({
@@ -238,18 +257,115 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
       }
     });
 
-    actions.appendChild(restartButton);
+    const restartButton = document.createElement("button");
+    restartButton.type = "button";
+    restartButton.className = "btn btn-secondary";
+    restartButton.textContent = "Пройти тест заново";
+    restartButton.addEventListener("click", reset);
+
     actions.appendChild(formatButton);
+    actions.appendChild(restartButton);
 
     resultNode.className = "test-result";
     resultNode.appendChild(kicker);
     resultNode.appendChild(title);
-    resultNode.appendChild(duration);
+    resultNode.appendChild(resultLead);
     resultNode.appendChild(summary);
     resultNode.appendChild(actions);
 
     backButton.hidden = true;
     nextButton.hidden = true;
+  }
+
+  function restoreCurrentView() {
+    if (state.view === "result" && showInlineResult) {
+      renderResult();
+      return;
+    }
+
+    renderQuestion();
+  }
+
+  function stabilizeStageHeight() {
+    if (!stageRoot) {
+      return;
+    }
+
+    if (!window.matchMedia("(min-width: 901px)").matches) {
+      stageRoot.style.removeProperty("min-height");
+      restoreCurrentView();
+      return;
+    }
+
+    const snapshot = {
+      index: state.index,
+      view: state.view,
+      answers: {
+        profile: state.answers.profile,
+        problems: [...state.answers.problems]
+      }
+    };
+
+    const measurementStates = [
+      {
+        index: 0,
+        view: "question",
+        answers: {
+          profile: "",
+          problems: []
+        }
+      },
+      {
+        index: 1,
+        view: "question",
+        answers: {
+          profile: "corporation",
+          problems: ["management", "handoffs", "alignment", "projects"]
+        }
+      }
+    ];
+
+    if (showInlineResult) {
+      measurementStates.push({
+        index: 1,
+        view: "result",
+        answers: {
+          profile: "corporation",
+          problems: ["management", "handoffs", "alignment", "projects"]
+        }
+      });
+    }
+
+    stageRoot.style.removeProperty("min-height");
+
+    let maxHeight = 0;
+
+    measurementStates.forEach((entry) => {
+      state.index = entry.index;
+      state.view = entry.view;
+      state.answers = {
+        profile: entry.answers.profile,
+        problems: [...entry.answers.problems]
+      };
+
+      if (entry.view === "result") {
+        renderResult();
+      } else {
+        renderQuestion();
+      }
+
+      maxHeight = Math.max(maxHeight, Math.ceil(stageRoot.getBoundingClientRect().height));
+    });
+
+    state.index = snapshot.index;
+    state.view = snapshot.view;
+    state.answers = {
+      profile: snapshot.answers.profile,
+      problems: [...snapshot.answers.problems]
+    };
+
+    stageRoot.style.minHeight = `${maxHeight}px`;
+    restoreCurrentView();
   }
 
   backButton.addEventListener("click", () => {
@@ -267,7 +383,24 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
     }
 
     if (state.index === TEST_STEPS.length - 1) {
+      if (!showInlineResult) {
+        if (typeof onShowFormat === "function") {
+          onShowFormat({
+            profile: state.answers.profile,
+            problems: [...state.answers.problems],
+            recommendation: getRecommendation(state.answers.problems.length)
+          });
+        }
+        return;
+      }
       renderResult();
+      if (typeof onShowFormat === "function") {
+        onShowFormat({
+          profile: state.answers.profile,
+          problems: [...state.answers.problems],
+          recommendation: getRecommendation(state.answers.problems.length)
+        });
+      }
       return;
     }
 
@@ -276,6 +409,8 @@ export function mountProblemTest({ questionWrap, stepMeta, progressBar, nextButt
   });
 
   reset();
+  stabilizeStageHeight();
+  window.addEventListener("resize", stabilizeStageHeight);
 
   return { reset };
 }

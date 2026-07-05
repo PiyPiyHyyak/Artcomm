@@ -387,11 +387,13 @@ function renderIksPillars(root, pillars) {
 
     const wrap = documentRef.createElement("div");
     const title = documentRef.createElement("strong");
-    const text = documentRef.createElement("p");
     title.textContent = item.title || "";
-    text.textContent = item.text || "";
     wrap.appendChild(title);
-    wrap.appendChild(text);
+    if (item.text) {
+      const text = documentRef.createElement("p");
+      text.textContent = item.text;
+      wrap.appendChild(text);
+    }
 
     li.appendChild(wrap);
     container.appendChild(li);

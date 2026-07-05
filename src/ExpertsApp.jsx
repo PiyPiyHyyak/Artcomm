@@ -173,7 +173,7 @@ export default function ExpertsApp() {
               <div className="expert-copy-core">
                 <p className="section-kicker">{expert.kicker || "Наши эксперты"}</p>
                 <h1 className="experts-page-title">{expert.title || "Роман Скудняков"}</h1>
-                <p className="expert-lead-quote">{expert.quote || "«Управляемость команды начинается с того, как она разговаривает и как принимает решения»."}</p>
+                <p className="expert-lead-quote">{expert.quote || "«Управляемость команды начинается с того, как она разговаривает и как принимает решения»"}</p>
                 <p className="expert-brief">{expert.brief || "Стратегический коммуникатор и модератор управленческих команд в сложных распределённых структурах."}</p>
 
                 <ul className="positions">

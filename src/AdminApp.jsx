@@ -1354,21 +1354,21 @@ const DEFAULT_MEDIASTATION_REVIEW_CARDS = [
     name: "Ольга Петрова",
     meta: "Заместитель министра науки РФ",
     quote:
-      "«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия.»"
+      "«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»"
   },
   {
     image: "",
     alt: "Елена Светлова",
     name: "Елена Светлова",
     meta: "Озёрск",
-    quote: "«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели.»"
+    quote: "«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»"
   },
   {
     image: "",
     alt: "Ульяна Реброва",
     name: "Ульяна Реброва",
     meta: "Полярные Зори",
-    quote: "«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов.»"
+    quote: "«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»"
   }
 ];
 
@@ -1668,9 +1668,8 @@ function buildModalBodyFromEditor(modalId, data) {
         if (!name && !meta && !quote && !image) {
           return "";
         }
-        const initials = escapeHtml(getShortInitials(card?.name || "", "Фото"));
-        return `<article class="modal-review-card">
-            <div class="modal-review-media">${image ? `<img src="${image}" alt="${alt}" loading="lazy">` : `<div class="modal-review-avatar-empty" aria-hidden="true">${initials}</div>`}</div>
+        return `<article class="modal-review-card${image ? " has-media" : ""}">
+            ${image ? `<div class="modal-review-media"><img src="${image}" alt="${alt}" loading="lazy"></div>` : ""}
             <div class="modal-review-copy">
               ${name ? `<h4>${name}</h4>` : ""}
               ${meta ? `<p class="modal-review-meta">${meta}</p>` : ""}

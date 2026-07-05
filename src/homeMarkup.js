@@ -11,7 +11,7 @@ const homeMarkup = String.raw`
         </div>
       </a>
       <div class="header-actions">
-        <a class="btn btn-primary" href="#contacts" data-scroll="#contacts">Связаться</a>
+        <a class="btn btn-primary" href="#contactsAnchor" data-scroll="#contactsAnchor">Связаться</a>
         <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="menuDrawer">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <line x1="4" y1="7" x2="20" y2="7"></line>
@@ -31,11 +31,11 @@ const homeMarkup = String.raw`
     </div>
     <nav class="drawer-nav">
       <a href="/">Главная страница</a>
-      <a href="/test">Тест</a>
+      <a href="#commonTestAnchor" data-scroll="#commonTestAnchor">Тест</a>
       <a href="#ms" data-scroll="#ms">Наши проекты</a>
       <a href="/?modal=formats" data-modal="formats">Форматы работы</a>
       <a href="#expert" data-scroll="#expert">Наши эксперты</a>
-      <a href="#contacts" data-scroll="#contacts">Контакты</a>
+      <a href="#contactsAnchor" data-scroll="#contactsAnchor">Контакты</a>
       <a href="/about">Сведения об организации</a>
     </nav>
   </aside>
@@ -73,55 +73,34 @@ const homeMarkup = String.raw`
     </section>
 
     <section class="common section-pale" id="common">
-      <div id="commin" aria-hidden="true"></div>
+      <div id="commonTestAnchor" aria-hidden="true"></div>
       <div class="container common-redo">
         <div class="common-redo-grid">
           <div class="common-redo-left">
-            <div class="common-drum-stage" id="commonDrumStage" aria-label="Проблематика управленческих команд">
-              <div class="common-drum-sticky">
-                <header class="section-head common-redo-head" data-reveal>
-                  <p class="section-kicker">Ты из корпорации или органа власти?</p>
-                  <h2>Знакомо? Болит? Тревожит?</h2>
-                </header>
+            <div class="common-test-shell">
+              <header class="section-head common-test-head">
+                <p class="section-kicker">Короткий тест</p>
+                <h2>
+                  <span>Короткий тест</span>
+                  <span>для управленческой команды</span>
+                </h2>
+                <p class="common-test-lead">Два шага помогут быстро понять, какой формат работы АртКомм подойдёт вашей команде прямо сейчас.</p>
+              </header>
 
-                <div class="common-drum-stack" id="commonDrumStack">
-                  <article class="common-drum-item pain-redo" data-drum-index="0">
-                    <span class="pain-redo-icon" aria-hidden="true">›</span>
-                    <div class="pain-redo-copy">
-                      <h3>Сильная команда — слабая управляемость</h3>
-                      <p>Решения есть, но теряются на стыках подразделений.</p>
-                    </div>
-                  </article>
-                  <article class="common-drum-item pain-redo" data-drum-index="1">
-                    <span class="pain-redo-icon" aria-hidden="true">›</span>
-                    <div class="pain-redo-copy">
-                      <h3>Разрывы во взаимодействии</h3>
-                      <p>Информация передаётся медленно и искажается по пути.</p>
-                    </div>
-                  </article>
-                  <article class="common-drum-item pain-redo" data-drum-index="2">
-                    <span class="pain-redo-icon" aria-hidden="true">›</span>
-                    <div class="pain-redo-copy">
-                      <h3>Руководителя слушают, но не слышат</h3>
-                      <p>Сигнал сверху не превращается в действия на местах.</p>
-                    </div>
-                  </article>
-                  <article class="common-drum-item pain-redo" data-drum-index="3">
-                    <span class="pain-redo-icon" aria-hidden="true">›</span>
-                    <div class="pain-redo-copy">
-                      <h3>Есть идеи — мало системных проектов</h3>
-                      <p>Потенциал сотрудников не превращается в устойчивый результат.</p>
-                    </div>
-                  </article>
+              <section class="test-stage common-test-stage" aria-live="polite">
+                <div class="test-stage-head">
+                  <p class="test-step-meta" id="testStepMeta">Шаг 1 из 2</p>
+                  <div class="test-progress" aria-hidden="true"><i id="testProgressBar"></i></div>
                 </div>
 
-                <div class="common-drum-arrow" id="commonDrumArrow" aria-hidden="true">
-                  <img class="common-drum-arrow-base" src="/assets/Group%2089.svg" alt="">
-                  <div class="common-drum-arrow-fill">
-                    <img src="/assets/Group%2089.svg" alt="">
-                  </div>
+                <div id="testQuestionWrap"></div>
+                <div id="testResult" hidden></div>
+
+                <div class="test-actions">
+                  <button class="btn btn-secondary" id="testBack" disabled>Назад</button>
+                  <button class="btn btn-primary" id="testNext" disabled>Далее</button>
                 </div>
-              </div>
+              </section>
             </div>
           </div>
 
@@ -284,25 +263,21 @@ const homeMarkup = String.raw`
               <li data-key="Организация и процессы" tabindex="0">
                 <div>
                   <strong>Организация и процессы</strong>
-                  <p>Насколько чётко распределены процессы, ответственность и ритм решений.</p>
                 </div>
               </li>
               <li data-key="Компетенции и роли" tabindex="0">
                 <div>
                   <strong>Компетенции и роли</strong>
-                  <p>Готовность ролей к диалогу, фасилитации и управлению сложными стыками.</p>
                 </div>
               </li>
               <li data-key="Контент и производство" tabindex="0">
                 <div>
                   <strong>Контент и производство</strong>
-                  <p>Качество смыслов и единый язык, который доходит до исполнения.</p>
                 </div>
               </li>
               <li data-key="Охват и каналы" tabindex="0">
                 <div>
                   <strong>Охват и каналы</strong>
-                  <p>Плотность каналов и глубина включения команды в общий контур коммуникаций.</p>
                 </div>
               </li>
             </ul>
@@ -363,7 +338,7 @@ const homeMarkup = String.raw`
           <div class="expert-copy-core">
             <p class="section-kicker">Наши эксперты</p>
             <h2>Роман Скудняков</h2>
-            <p class="expert-lead-quote">«Управляемость команды начинается с того, как она разговаривает и как принимает решения».</p>
+            <p class="expert-lead-quote">«Управляемость команды начинается с того, как она разговаривает и как принимает решения»</p>
             <p class="expert-brief">Стратегический коммуникатор и модератор управленческих команд в сложных распределённых структурах.</p>
 
             <ul class="positions">
@@ -374,8 +349,8 @@ const homeMarkup = String.raw`
           </div>
 
           <div class="stack-actions horizontal expert-actions">
-            <button class="btn btn-primary" data-modal="team">Команда Арткомм</button>
-            <button class="btn btn-secondary" data-modal="awards">Профессиональные награды</button>
+            <button class="btn btn-primary" data-modal="awards">Профессиональные награды</button>
+            <button class="btn btn-secondary" data-modal="team">Команда Арткомм</button>
           </div>
         </article>
       </div>
@@ -383,7 +358,7 @@ const homeMarkup = String.raw`
 
     <section class="contacts section-deep" id="contacts">
       <div class="container contacts-reset">
-        <header class="contacts-head" data-reveal>
+        <header class="contacts-head" id="contactsAnchor" data-reveal>
           <p class="section-kicker">Обратная связь</p>
           <h2>
             <span>Управление командой</span>
@@ -405,13 +380,13 @@ const homeMarkup = String.raw`
           <article class="contacts-info-card" data-reveal>
             <article class="trusted-network-card is-standalone">
               <h3>Нам доверяют</h3>
-              <p class="trusted-network-sub">Работаем более чем в 40 городах — от распределённых команд до отраслевых управленческих контуров.</p>
+              <p class="trusted-network-sub">Сопровождаем управленческие команды и проекты более чем в 40 городах России.</p>
 
               <div class="trusted-network" id="trustedNetwork" aria-label="Партнёрская сеть">
                 <canvas class="trusted-network-canvas" id="trustedNetworkCanvas" aria-hidden="true"></canvas>
 
                 <span class="trusted-node node-rosatom" data-node data-x="13" data-y="16" data-range="42">
-                  <img src="/assets/logos/rosatom-white.png" alt="" aria-hidden="true" loading="lazy">
+                  <img src="/assets/logos/rosatom.png" alt="" aria-hidden="true" loading="lazy">
                   <span class="trusted-node-name">Росатом</span>
                 </span>
                 <span class="trusted-node node-znanie" data-node data-x="34" data-y="14" data-range="40">
@@ -519,7 +494,7 @@ const homeMarkup = String.raw`
               <a href="#ms" data-scroll="#ms">Наши проекты</a>
               <a href="#iks" data-scroll="#iks">Методология</a>
               <a href="#expert" data-scroll="#expert">Наши эксперты</a>
-              <a href="#contacts" data-scroll="#contacts">Обратная связь</a>
+              <a href="#contactsAnchor" data-scroll="#contactsAnchor">Обратная связь</a>
             </nav>
           </section>
         </div>
@@ -540,33 +515,24 @@ const homeMarkup = String.raw`
       <h3 id="msParticipantsTitle">Отзывы о МедиаСтанции</h3>
       <div class="modal-review-list">
         <article class="modal-review-card">
-          <div class="modal-review-media">
-            <div class="modal-review-avatar-empty" aria-hidden="true">ОП</div>
-          </div>
           <div class="modal-review-copy">
             <h4>Ольга Петрова</h4>
             <p class="modal-review-meta">Заместитель министра науки РФ</p>
-            <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия.»</p>
+            <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
           </div>
         </article>
         <article class="modal-review-card">
-          <div class="modal-review-media">
-            <div class="modal-review-avatar-empty" aria-hidden="true">ЕС</div>
-          </div>
           <div class="modal-review-copy">
             <h4>Елена Светлова</h4>
             <p class="modal-review-meta">Озёрск</p>
-            <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели.»</p>
+            <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
           </div>
         </article>
         <article class="modal-review-card">
-          <div class="modal-review-media">
-            <div class="modal-review-avatar-empty" aria-hidden="true">УР</div>
-          </div>
           <div class="modal-review-copy">
             <h4>Ульяна Реброва</h4>
             <p class="modal-review-meta">Полярные Зори</p>
-            <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов.»</p>
+            <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»</p>
           </div>
         </article>
       </div>
