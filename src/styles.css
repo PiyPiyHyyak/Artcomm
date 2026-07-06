@@ -5085,14 +5085,33 @@ h3 {
 
   .common-redo-left {
     display: block;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 30px;
+  }
+
+  .common-test-stage .test-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .common-test-stage .test-actions .btn {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    align-self: stretch;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .common-redo-cta {
     position: relative;
     top: auto;
     min-height: auto;
-    width: calc(100% - 32px);
-    margin: 18px auto 0;
+    width: 100%;
+    margin: 0;
   }
 
   .common-redo-divider {
@@ -5102,7 +5121,7 @@ h3 {
   .common-redo-cta-inner {
     min-height: auto;
     width: 100%;
-    padding: 36px 16px 32px;
+    padding: 40px 20px 0;
     gap: 14px;
   }
 
@@ -5148,7 +5167,14 @@ h3 {
   }
 
   .common-cta-men {
-    display: none !important;
+    display: block !important;
+    width: min(82%, 380px);
+    max-width: 100%;
+    margin-top: 26px;
+    transform: none;
+    opacity: 0.92;
+    clip-path: none;
+    justify-self: center;
   }
 
   .common-cta-men img {
@@ -8434,6 +8460,12 @@ body.menu-open .about-header .logo-mark {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
+}
+
+.formats-modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 
 .format-showcase-card {

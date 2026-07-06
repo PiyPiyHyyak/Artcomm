@@ -466,30 +466,68 @@ function normalizeMediaStationReviewsModal(content) {
     return false;
   }
 
+  const reviewPhotoByName = new Map([
+    ["ольга петрова", "/assets/reviews/olga-petrova.svg"],
+    ["елена светлова", "/assets/reviews/elena-svetlova.svg"],
+    ["ульяна реброва", "/assets/reviews/ulyana-rebrova.svg"]
+  ]);
+
+  const formatsMethodologyButton =
+    '\n        <div class="formats-modal-actions">\n          <a class="btn btn-secondary" href="/?modal=methodology" data-modal="methodology">Узнать методологию</a>\n        </div>';
+
   let changed = false;
   content.modals = content.modals.map((entry) => {
-    if (!entry || entry.id !== "ms-participants") {
+    if (!entry) {
+      return entry;
+    }
+
+    if (entry.id === "formats") {
+      const formatsBody = String(entry.bodyHtml || "");
+      if (formatsBody.includes("format-showcase") && !formatsBody.includes("formats-modal-actions")) {
+        changed = true;
+        return { ...entry, bodyHtml: formatsBody + formatsMethodologyButton };
+      }
+      return entry;
+    }
+
+    if (entry.id !== "ms-participants") {
       return entry;
     }
 
     const rawBodyHtml = String(entry.bodyHtml || "");
-    const cleanedBodyHtml = rawBodyHtml
-      .replace(/<div class=["']modal-review-media["'][^>]*>\s*<img[^>]*src=["']\/assets\/reviews\/[^"']+\.svg["'][^>]*>\s*<\/div>\s*/gi, "")
-      .replace(/<div class=["']modal-review-media["'][^>]*>\s*<div class=["']modal-review-avatar-empty["'][\s\S]*?<\/div>\s*<\/div>\s*/gi, "");
-    const normalizedCardsBodyHtml = cleanedBodyHtml.replace(
-      /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
-      (match, innerHtml) => {
-        const hasRealImage = /<div class=["']modal-review-media["'][^>]*>\s*<img\b/i.test(innerHtml);
-        return `<article class="modal-review-card${hasRealImage ? " has-media" : ""}">${innerHtml}</article>`;
-      }
-    );
     const rawTitle = String(entry.title || "").trim();
-    const needsBodyUpgrade = !rawBodyHtml.includes("modal-review-card");
-    const needsPlaceholderCleanup = cleanedBodyHtml !== rawBodyHtml;
-    const needsCardNormalization = normalizedCardsBodyHtml !== cleanedBodyHtml;
     const needsTitleUpgrade = rawTitle === "Участники о проекте" || rawTitle === "Отзывы участников";
 
-    if (!needsBodyUpgrade && !needsTitleUpgrade && !needsPlaceholderCleanup && !needsCardNormalization) {
+    // No review cards at all — restore the default (which now includes speaker photos).
+    if (!rawBodyHtml.includes("modal-review-card")) {
+      changed = true;
+      return {
+        ...entry,
+        title: needsTitleUpgrade ? defaultReviewsEntry.title : entry.title,
+        bodyHtml: defaultReviewsEntry.bodyHtml
+      };
+    }
+
+    // Ensure every known speaker card carries their photo, while preserving edited text.
+    const upgradedBodyHtml = rawBodyHtml.replace(
+      /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
+      (match, innerHtml) => {
+        const copyHtml = innerHtml
+          .replace(/<div class=["']modal-review-media["'][^>]*>[\s\S]*?<\/div>\s*<\/div>\s*/gi, "")
+          .replace(/<div class=["']modal-review-media["'][^>]*>\s*<img\b[^>]*>\s*<\/div>\s*/gi, "")
+          .trim();
+        const nameMatch = copyHtml.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
+        const displayName = nameMatch ? nameMatch[1].replace(/<[^>]*>/g, "").trim() : "";
+        const photo = reviewPhotoByName.get(displayName.toLowerCase());
+        if (!photo) {
+          return `<article class="modal-review-card">${copyHtml}</article>`;
+        }
+        const media = `<div class="modal-review-media"><img src="${photo}" alt="${displayName}" loading="lazy"></div>`;
+        return `<article class="modal-review-card has-media">${media}${copyHtml}</article>`;
+      }
+    );
+
+    if (upgradedBodyHtml === rawBodyHtml && !needsTitleUpgrade) {
       return entry;
     }
 
@@ -497,7 +535,7 @@ function normalizeMediaStationReviewsModal(content) {
     return {
       ...entry,
       title: needsTitleUpgrade ? defaultReviewsEntry.title : entry.title,
-      bodyHtml: needsBodyUpgrade ? defaultReviewsEntry.bodyHtml : normalizedCardsBodyHtml
+      bodyHtml: upgradedBodyHtml
     };
   });
 

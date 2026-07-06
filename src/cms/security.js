@@ -26,7 +26,7 @@ const ALLOWED_HTML_TAGS = new Set([
 
 const COMMON_ATTRS = new Set(["class"]);
 const TAG_ATTRS = {
-  a: new Set(["href", "target", "rel", "class"]),
+  a: new Set(["href", "target", "rel", "class", "data-modal", "data-scroll"]),
   i: new Set(["data-value", "class"]),
   span: new Set(["class"]),
   div: new Set(["class"]),
@@ -138,6 +138,20 @@ function copyAllowedAttributes(sourceNode, targetNode, documentRef) {
 
     if (attrName === "data-value") {
       targetNode.setAttribute("data-value", sanitizeDataValue(attrValue));
+      return;
+    }
+
+    if (attrName === "data-modal") {
+      if (/^[a-z0-9-]{1,48}$/i.test(attrValue)) {
+        targetNode.setAttribute("data-modal", attrValue);
+      }
+      return;
+    }
+
+    if (attrName === "data-scroll") {
+      if (/^#[a-z0-9_-]{1,64}$/i.test(attrValue)) {
+        targetNode.setAttribute("data-scroll", attrValue);
+      }
       return;
     }
 

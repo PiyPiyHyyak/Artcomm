@@ -167,7 +167,7 @@ export default function initSite() {
 
     const getTargetOffset = () => {
       const headerOffset = siteHeader ? siteHeader.offsetHeight : 0;
-      if (targetSelector === "#contactsAnchor") {
+      if (targetSelector === "#contactsAnchor" || targetSelector === "#contactForm") {
         return headerOffset + (window.innerWidth <= 900 ? 8 : 12);
       }
       return headerOffset;
@@ -1812,6 +1812,9 @@ export default function initSite() {
 
         if (matchedCard) {
           matchedCard.classList.add("is-recommended");
+          window.requestAnimationFrame(function () {
+            matchedCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+          });
         }
       }
     }

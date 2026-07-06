@@ -11,7 +11,7 @@ const homeMarkup = String.raw`
         </div>
       </a>
       <div class="header-actions">
-        <a class="btn btn-primary" href="#contactsAnchor" data-scroll="#contactsAnchor">Связаться</a>
+        <a class="btn btn-primary" href="#contactForm" data-scroll="#contactForm">Связаться</a>
         <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="menuDrawer">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <line x1="4" y1="7" x2="20" y2="7"></line>
@@ -161,8 +161,8 @@ const homeMarkup = String.raw`
 
         <section class="ms-metric-line" data-reveal>
           <div class="ms-metric-main">
-            <span class="metric-value" data-counter="82.4" data-suffix="%">82,4%</span>
-            <p>готовы назвать себя амбассадорами Росатома</p>
+            <span class="metric-value" data-counter="75.5" data-suffix="%">75,5%</span>
+            <p>NPS проекта</p>
           </div>
 
           <div class="ms-stats-list">
@@ -244,6 +244,7 @@ const homeMarkup = String.raw`
         <div class="ms-tail-minimal" data-reveal>
           <div class="stack-actions horizontal iks-actions ms-tail-actions">
             <button class="btn btn-primary" data-modal="ms-participants">Отзывы о МедиаСтанции</button>
+            <a class="btn btn-secondary" href="/projects" data-link="/projects">Другие проекты</a>
           </div>
         </div>
       </div>
@@ -290,7 +291,6 @@ const homeMarkup = String.raw`
             <div class="iks-chart-meta">
               <div class="iks-chart-legend" aria-hidden="true">
                 <span><i class="city-line"></i>Город (пример)</span>
-                <span><i class="avg-line"></i>Среднее по городам</span>
               </div>
             </div>
           </article>
@@ -380,7 +380,7 @@ const homeMarkup = String.raw`
           <article class="contacts-info-card" data-reveal>
             <article class="trusted-network-card is-standalone">
               <h3>Нам доверяют</h3>
-              <p class="trusted-network-sub">Сопровождаем управленческие команды и проекты более чем в 40 городах России.</p>
+              <p class="trusted-network-sub">Работаем в 40+ городах</p>
 
               <div class="trusted-network" id="trustedNetwork" aria-label="Партнёрская сеть">
                 <canvas class="trusted-network-canvas" id="trustedNetworkCanvas" aria-hidden="true"></canvas>
@@ -514,21 +514,30 @@ const homeMarkup = String.raw`
       <button class="modal-close" aria-label="Закрыть">×</button>
       <h3 id="msParticipantsTitle">Отзывы о МедиаСтанции</h3>
       <div class="modal-review-list">
-        <article class="modal-review-card">
+        <article class="modal-review-card has-media">
+          <div class="modal-review-media">
+            <img src="/assets/reviews/olga-petrova.svg" alt="Ольга Петрова" loading="lazy">
+          </div>
           <div class="modal-review-copy">
             <h4>Ольга Петрова</h4>
             <p class="modal-review-meta">Заместитель министра науки РФ</p>
             <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
           </div>
         </article>
-        <article class="modal-review-card">
+        <article class="modal-review-card has-media">
+          <div class="modal-review-media">
+            <img src="/assets/reviews/elena-svetlova.svg" alt="Елена Светлова" loading="lazy">
+          </div>
           <div class="modal-review-copy">
             <h4>Елена Светлова</h4>
             <p class="modal-review-meta">Озёрск</p>
             <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
           </div>
         </article>
-        <article class="modal-review-card">
+        <article class="modal-review-card has-media">
+          <div class="modal-review-media">
+            <img src="/assets/reviews/ulyana-rebrova.svg" alt="Ульяна Реброва" loading="lazy">
+          </div>
           <div class="modal-review-copy">
             <h4>Ульяна Реброва</h4>
             <p class="modal-review-meta">Полярные Зори</p>
@@ -628,6 +637,9 @@ const homeMarkup = String.raw`
             </div>
           </div>
         </article>
+      </div>
+      <div class="formats-modal-actions">
+        <a class="btn btn-secondary" href="/?modal=methodology" data-modal="methodology">Узнать методологию</a>
       </div>
     </article>
 

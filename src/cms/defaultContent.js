@@ -60,9 +60,9 @@ export const DEFAULT_CONTENT = {
       videoFallback: "/assets/gimn-ed-zy9mar.mp4",
       storyTitle: "Ускоряем рабочие договорённости внутри больших распределённых команд",
       storyText: "Собираем единый коммуникационный ритм для людей из разных городов и контуров управления.",
-      metricValue: "82,4",
+      metricValue: "75,5",
       metricSuffix: "%",
-      metricCaption: "готовы назвать себя амбассадорами Росатома",
+      metricCaption: "NPS проекта",
       stats: [
         { id: "ms-stat-1", value: "969", suffix: "", label: "участников", isPublished: true },
         { id: "ms-stat-2", value: "30", suffix: "", label: "городов", isPublished: true },
@@ -179,7 +179,7 @@ export const DEFAULT_CONTENT = {
       newsLink: "/privacy#marketing-consent",
       submitLabel: "Отправить",
       trustedTitle: "Нам доверяют",
-      trustedSubtitle: "Сопровождаем управленческие команды и проекты более чем в 40 городах России."
+      trustedSubtitle: "Работаем в 40+ городах"
     }
   },
   projects: {
@@ -235,21 +235,30 @@ export const DEFAULT_CONTENT = {
       title: "Отзывы о МедиаСтанции",
       bodyHtml: String.raw`
         <div class="modal-review-list">
-          <article class="modal-review-card">
+          <article class="modal-review-card has-media">
+            <div class="modal-review-media">
+              <img src="/assets/reviews/olga-petrova.svg" alt="Ольга Петрова" loading="lazy">
+            </div>
             <div class="modal-review-copy">
               <h4>Ольга Петрова</h4>
               <p class="modal-review-meta">Заместитель министра науки РФ</p>
               <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
             </div>
           </article>
-          <article class="modal-review-card">
+          <article class="modal-review-card has-media">
+            <div class="modal-review-media">
+              <img src="/assets/reviews/elena-svetlova.svg" alt="Елена Светлова" loading="lazy">
+            </div>
             <div class="modal-review-copy">
               <h4>Елена Светлова</h4>
               <p class="modal-review-meta">Озёрск</p>
               <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
             </div>
           </article>
-          <article class="modal-review-card">
+          <article class="modal-review-card has-media">
+            <div class="modal-review-media">
+              <img src="/assets/reviews/ulyana-rebrova.svg" alt="Ульяна Реброва" loading="lazy">
+            </div>
             <div class="modal-review-copy">
               <h4>Ульяна Реброва</h4>
               <p class="modal-review-meta">Полярные Зори</p>
@@ -346,6 +355,9 @@ export const DEFAULT_CONTENT = {
               </div>
             </div>
           </article>
+        </div>
+        <div class="formats-modal-actions">
+          <a class="btn btn-secondary" href="/?modal=methodology" data-modal="methodology">Узнать методологию</a>
         </div>`,
       isPublished: true
     },
