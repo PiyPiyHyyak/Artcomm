@@ -60,16 +60,15 @@ export const DEFAULT_CONTENT = {
       videoFallback: "/assets/gimn-ed-zy9mar.mp4",
       storyTitle: "Ускоряем рабочие договорённости внутри больших распределённых команд",
       storyText: "Собираем единый коммуникационный ритм для людей из разных городов и контуров управления.",
-      metricValue: "75,5",
+      metricValue: "76,9",
       metricSuffix: "%",
-      metricCaption: "NPS проекта",
+      metricCaption: "вовлечённости",
       stats: [
         { id: "ms-stat-1", value: "969", suffix: "", label: "участников", isPublished: true },
         { id: "ms-stat-2", value: "30", suffix: "", label: "городов", isPublished: true },
         { id: "ms-stat-3", value: "11", suffix: "", label: "часовых поясов", isPublished: true },
         { id: "ms-stat-4", value: "20", suffix: " млн", label: "просмотров", isPublished: true },
-        { id: "ms-stat-5", value: "5 200", suffix: "", label: "медиапродуктов", isPublished: true },
-        { id: "ms-stat-6", value: "76,9", suffix: "%", label: "вовлечённости", isPublished: true }
+        { id: "ms-stat-5", value: "5 200", suffix: "", label: "медиапродуктов", isPublished: true }
       ],
       loyalty: [
         { id: "ms-loyalty-1", value: "82", label: "Называю себя амбассадором", isPublished: true },
@@ -201,6 +200,7 @@ export const DEFAULT_CONTENT = {
       mutedLabel: "Выключить звук",
       reviewsLabel: "Отзывы о МедиаСтанции",
       extraStats: [
+        { id: "project-ms-stat-6", value: "76,9", suffix: "%", label: "вовлечённости" },
         { id: "project-ms-stat-7", value: "75,5", suffix: "%", label: "NPS" }
       ]
     },

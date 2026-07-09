@@ -622,12 +622,42 @@ function normalizeTrustedPartners(content) {
   }
 
   const mediaStation = content.home?.mediaStation;
-  const legacyMetricCaption = "готовы назвать себя амбассадорами Росатома";
-  if (mediaStation && mediaStation.metricCaption === legacyMetricCaption) {
-    mediaStation.metricValue = "75,5";
-    mediaStation.metricSuffix = "%";
-    mediaStation.metricCaption = "NPS проекта";
-    changed = true;
+  const legacyMetricCaptions = ["готовы назвать себя амбассадорами Росатома", "NPS проекта"];
+  if (mediaStation) {
+    if (legacyMetricCaptions.includes(String(mediaStation.metricCaption || "").trim())) {
+      mediaStation.metricValue = "76,9";
+      mediaStation.metricSuffix = "%";
+      mediaStation.metricCaption = "вовлечённости";
+      changed = true;
+    }
+    // Engagement is now the headline metric — drop it from the stats row to avoid a duplicate.
+    if (Array.isArray(mediaStation.stats)) {
+      const filteredStats = mediaStation.stats.filter(
+        (s) => !(s && (s.id === "ms-stat-6" || String(s.label || "").trim() === "вовлечённости"))
+      );
+      if (filteredStats.length !== mediaStation.stats.length) {
+        mediaStation.stats = filteredStats;
+        changed = true;
+      }
+    }
+  }
+
+  // Keep engagement on the /projects flagship stats grid (it is not a headline metric there).
+  const flagship = content.projects?.flagship;
+  if (flagship && Array.isArray(flagship.extraStats)) {
+    const hasEngagement = flagship.extraStats.some(
+      (s) => s && String(s.label || "").trim() === "вовлечённости"
+    );
+    if (!hasEngagement) {
+      const engagement = { id: "project-ms-stat-6", value: "76,9", suffix: "%", label: "вовлечённости" };
+      const npsIdx = flagship.extraStats.findIndex((s) => s && String(s.label || "").trim() === "NPS");
+      if (npsIdx >= 0) {
+        flagship.extraStats.splice(npsIdx, 0, engagement);
+      } else {
+        flagship.extraStats.unshift(engagement);
+      }
+      changed = true;
+    }
   }
 
   return changed;

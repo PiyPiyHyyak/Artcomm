@@ -161,8 +161,8 @@ const homeMarkup = String.raw`
 
         <section class="ms-metric-line" data-reveal>
           <div class="ms-metric-main">
-            <span class="metric-value" data-counter="75.5" data-suffix="%">75,5%</span>
-            <p>NPS проекта</p>
+            <span class="metric-value" data-counter="76.9" data-suffix="%">76,9%</span>
+            <p>вовлечённости</p>
           </div>
 
           <div class="ms-stats-list">
@@ -171,7 +171,6 @@ const homeMarkup = String.raw`
             <article><strong data-counter="11">11</strong><span>часовых поясов</span></article>
             <article><strong data-counter="20" data-suffix=" млн">20 млн</strong><span>просмотров</span></article>
             <article><strong data-counter="5200">5 200</strong><span>медиапродуктов</span></article>
-            <article><strong data-counter="76.9" data-suffix="%">76,9%</strong><span>вовлечённости</span></article>
           </div>
         </section>
 
