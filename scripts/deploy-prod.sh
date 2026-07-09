@@ -32,8 +32,11 @@ if id -u www-data >/dev/null 2>&1; then
   chmod -R u+rwX,g+rwX "$WEB_ROOT/assets"
 fi
 
-if systemctl list-unit-files | grep -q "^${CMS_SERVICE}\\.service"; then
+if systemctl cat "$CMS_SERVICE" >/dev/null 2>&1; then
   systemctl restart "$CMS_SERVICE"
+  echo "Restarted $CMS_SERVICE (CMS content migrations applied)"
+else
+  echo "WARN: systemd unit '$CMS_SERVICE' not found — CMS NOT restarted, content migrations will not apply"
 fi
 
 nginx -t
