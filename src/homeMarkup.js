@@ -35,7 +35,7 @@ const homeMarkup = String.raw`
       <a href="#ms" data-scroll="#ms">Наши проекты</a>
       <a href="/?modal=formats" data-modal="formats">Форматы работы</a>
       <a href="#expert" data-scroll="#expert">Наши эксперты</a>
-      <a href="#contactsAnchor" data-scroll="#contactsAnchor">Контакты</a>
+      <a href="#contactsBlock" data-scroll="#contactsBlock">Контакты</a>
       <a href="/about">Сведения об организации</a>
     </nav>
   </aside>
@@ -348,7 +348,7 @@ const homeMarkup = String.raw`
             </ul>
           </div>
 
-          <div class="stack-actions horizontal expert-actions">
+          <div class="stack-actions expert-actions">
             <button class="btn btn-primary" data-modal="awards">Профессиональные награды</button>
             <button class="btn btn-secondary" data-modal="team">Команда Арткомм</button>
           </div>
@@ -366,7 +366,7 @@ const homeMarkup = String.raw`
           </h2>
         </header>
 
-        <div class="contacts-stage">
+        <div class="contacts-stage" id="contactsBlock">
           <article class="contacts-brief-card" data-reveal>
             <h3>Контакты</h3>
             <p class="contacts-brief-schedule-label">Режим работы</p>

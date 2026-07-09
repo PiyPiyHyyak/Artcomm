@@ -167,7 +167,11 @@ export default function initSite() {
 
     const getTargetOffset = () => {
       const headerOffset = siteHeader ? siteHeader.offsetHeight : 0;
-      if (targetSelector === "#contactsAnchor" || targetSelector === "#contactForm") {
+      if (
+        targetSelector === "#contactsAnchor" ||
+        targetSelector === "#contactForm" ||
+        targetSelector === "#contactsBlock"
+      ) {
         return headerOffset + (window.innerWidth <= 900 ? 8 : 12);
       }
       return headerOffset;

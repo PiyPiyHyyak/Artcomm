@@ -8281,8 +8281,9 @@ body.menu-open .about-header .logo-mark {
 .expert-actions {
   margin-top: 16px;
   padding-top: 20px;
-  align-items: flex-start;
-  gap: 14px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .expert-actions::before {
@@ -8305,6 +8306,7 @@ body.menu-open .about-header .logo-mark {
   font-size: 14px;
   letter-spacing: 0;
   white-space: nowrap;
+  width: min(320px, 100%);
 }
 
 .experts-page {

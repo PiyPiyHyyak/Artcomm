@@ -796,7 +796,9 @@ function normalizeHomeIksPillars(content) {
     const normalizedTitle = titleMap.get(sourceTitle) || fallback?.title || item.title || item.key;
     const normalizedKey = titleMap.get(sourceTitle) || fallback?.key || item.key || normalizedTitle;
 
-    if (item.title === normalizedTitle && item.key === normalizedKey) {
+    const needsTextClear = typeof item.text === "string" && item.text.trim() !== "";
+
+    if (item.title === normalizedTitle && item.key === normalizedKey && !needsTextClear) {
       return item;
     }
 
@@ -804,7 +806,8 @@ function normalizeHomeIksPillars(content) {
     return {
       ...item,
       title: normalizedTitle,
-      key: normalizedKey
+      key: normalizedKey,
+      text: ""
     };
   });
 
@@ -821,12 +824,27 @@ function normalizeHomeExpertHeading(content) {
     return false;
   }
 
-  if (String(expert.kicker || "").trim() === "Наши эксперты") {
-    return false;
+  let changed = false;
+
+  if (String(expert.kicker || "").trim() !== "Наши эксперты") {
+    expert.kicker = "Наши эксперты";
+    changed = true;
   }
 
-  expert.kicker = "Наши эксперты";
-  return true;
+  // Awards button must come before Team button (awards belong to Roman, not the team).
+  if (Array.isArray(expert.actions) && expert.actions.length >= 2) {
+    const awardsIdx = expert.actions.findIndex((a) => a && a.target === "awards");
+    const teamIdx = expert.actions.findIndex((a) => a && a.target === "team");
+    if (awardsIdx > 0 && teamIdx !== -1 && awardsIdx > teamIdx) {
+      const reordered = [...expert.actions];
+      const [awards] = reordered.splice(awardsIdx, 1);
+      reordered.unshift(awards);
+      expert.actions = reordered;
+      changed = true;
+    }
+  }
+
+  return changed;
 }
 
 function normalizeContactsLegalLinks(content) {
