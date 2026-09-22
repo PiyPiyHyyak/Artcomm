@@ -15,6 +15,30 @@ function setTextContent(root, selector, value) {
   }
 }
 
+function setFormatsModalTitle(root, titleNode, rawValue) {
+  if (!titleNode || typeof rawValue !== "string") {
+    return;
+  }
+
+  const documentRef = getDocumentRef(root);
+  const value = rawValue.trim();
+  const parts = value.split(/\s+—\s+/);
+
+  titleNode.textContent = "";
+
+  const firstLine = documentRef.createElement("span");
+  firstLine.className = "modal-title-line";
+  firstLine.textContent = parts.length > 1 ? `${parts[0]} — ` : value;
+  titleNode.appendChild(firstLine);
+
+  if (parts.length > 1) {
+    const secondLine = documentRef.createElement("span");
+    secondLine.className = "modal-title-line";
+    secondLine.textContent = parts.slice(1).join(" — ");
+    titleNode.appendChild(secondLine);
+  }
+}
+
 function setLinkContent(node, { text, href }) {
   if (!node) {
     return;
@@ -294,7 +318,13 @@ function renderMetricStats(root, stats) {
     const span = documentRef.createElement("span");
 
     const rawValue = String(item.value ?? "").trim();
-    const suffix = String(item.suffix || "").trim();
+    const rawSuffix = String(item.suffix || "");
+    const trimmedSuffix = rawSuffix.trim();
+    const needsSpaceBeforeSuffix =
+      Boolean(trimmedSuffix) &&
+      /\d$/.test(rawValue) &&
+      (/^\s/.test(rawSuffix) || /^[A-Za-zА-Яа-яЁё]/.test(trimmedSuffix));
+    const suffix = trimmedSuffix ? `${needsSpaceBeforeSuffix ? "\u00A0" : ""}${trimmedSuffix}` : "";
     const numeric = Number.parseFloat(rawValue.replace(",", ".").replace(/\s+/g, ""));
     if (Number.isFinite(numeric)) {
       strong.dataset.counter = String(numeric);
@@ -354,7 +384,7 @@ function renderLoyaltyRings(root, loyalty) {
     progress.setAttribute("data-value", String(value));
 
     const strong = documentRef.createElement("strong");
-    strong.textContent = `${Math.round(value)}%`;
+    strong.textContent = `${String(item.value ?? value).replace(".", ",")}%`;
 
     svg.appendChild(track);
     svg.appendChild(progress);
@@ -582,6 +612,12 @@ function applyHomeContent(root, content) {
 
     setTextContent(root, "#ms .ms-story-lead h3", home.mediaStation.storyTitle);
     setTextContent(root, "#ms .ms-story-lead p", home.mediaStation.storyText);
+    const mediaStoryLead = root.querySelector("#ms .ms-story-lead");
+    if (mediaStoryLead) {
+      const hasStoryTitle = String(home.mediaStation.storyTitle ?? "").trim().length > 0;
+      const hasStoryText = String(home.mediaStation.storyText ?? "").trim().length > 0;
+      mediaStoryLead.hidden = !(hasStoryTitle || hasStoryText);
+    }
     setTextContent(root, "#ms .ms-metric-main p", home.mediaStation.metricCaption);
     const metricNode = root.querySelector("#ms .ms-metric-main .metric-value");
     if (metricNode) {
@@ -727,7 +763,11 @@ function applyHomeContent(root, content) {
 
       const title = modal.querySelector("h3");
       if (title && typeof entry.title === "string" && entry.title) {
-        title.textContent = entry.title;
+        if (entry.id === "formats") {
+          setFormatsModalTitle(root, title, entry.title);
+        } else {
+          title.textContent = entry.title;
+        }
       }
 
       if (!entry.bodyHtml || entry.id === "test") {

@@ -67,18 +67,21 @@ export default function initSite() {
   const trustedNetworkNodes = $$(".trusted-node[data-node]", trustedNetwork || document);
   const pendingScrollStorageKey = "artcomm.pendingScrollTarget";
   let anchorScrollSequence = 0;
+  let anchorSettleTimers = [];
 
   function getModalRequestFromUrl() {
     try {
       const params = new URLSearchParams(window.location.search);
       const modal = String(params.get("modal") || "").trim().toLowerCase();
       const recommendation = String(params.get("recommendation") || "").trim().toLowerCase();
+      const formatsView = String(params.get("formatsView") || "").trim().toLowerCase();
       if (!/^[a-z0-9-]{1,48}$/i.test(modal)) {
         return null;
       }
       return {
         modal,
-        recommendation: /^[a-z0-9-]{1,32}$/i.test(recommendation) ? recommendation : ""
+        recommendation: /^[a-z0-9-]{1,32}$/i.test(recommendation) ? recommendation : "",
+        formatsView: formatsView === "recommended-only" ? formatsView : ""
       };
     } catch {
       return null;
@@ -134,6 +137,7 @@ export default function initSite() {
       } else {
         document.body.removeAttribute("data-formats-recommendation");
       }
+      document.body.setAttribute("data-formats-view", "recommended-only");
       openModal("formats");
     }
   });
@@ -159,11 +163,20 @@ export default function initSite() {
     });
   }
 
+  function clearAnchorSettleTimers() {
+    anchorSettleTimers.forEach(function (timerId) {
+      window.clearTimeout(timerId);
+    });
+    anchorSettleTimers = [];
+  }
+
   function scrollToTarget(targetSelector) {
     const target = $(targetSelector);
     if (!target) {
       return;
     }
+
+    clearAnchorSettleTimers();
 
     const getTargetOffset = () => {
       const headerOffset = siteHeader ? siteHeader.offsetHeight : 0;
@@ -179,22 +192,64 @@ export default function initSite() {
 
     const y = target.getBoundingClientRect().top + window.pageYOffset - getTargetOffset();
     const scrollSequence = ++anchorScrollSequence;
+    let scrollCaptureReleased = false;
+
+    const releaseScrollCapture = () => {
+      if (scrollCaptureReleased) {
+        return;
+      }
+      scrollCaptureReleased = true;
+      window.removeEventListener("wheel", interruptAnchorSettle);
+      window.removeEventListener("touchstart", interruptAnchorSettle);
+      window.removeEventListener("pointerdown", interruptAnchorSettle);
+      window.removeEventListener("keydown", interruptAnchorSettle);
+    };
+
+    const interruptAnchorSettle = (event) => {
+      if (scrollSequence !== anchorScrollSequence) {
+        releaseScrollCapture();
+        return;
+      }
+
+      if (event && event.type === "keydown") {
+        const interruptKeys = new Set([
+          "ArrowDown",
+          "ArrowUp",
+          "PageDown",
+          "PageUp",
+          "Home",
+          "End",
+          " ",
+          "Spacebar"
+        ]);
+        if (!interruptKeys.has(event.key)) {
+          return;
+        }
+      }
+
+      anchorScrollSequence += 1;
+      clearAnchorSettleTimers();
+      releaseScrollCapture();
+    };
 
     window.scrollTo({ top: y, behavior: "smooth" });
 
     const settleStartedAt = Date.now();
     const settle = () => {
       if (scrollSequence !== anchorScrollSequence) {
+        releaseScrollCapture();
         return;
       }
 
       const currentTarget = $(targetSelector);
       if (!currentTarget) {
+        releaseScrollCapture();
         return;
       }
 
       const delta = Math.round(currentTarget.getBoundingClientRect().top - getTargetOffset());
       if (Math.abs(delta) <= 1) {
+        releaseScrollCapture();
         return;
       }
 
@@ -204,14 +259,21 @@ export default function initSite() {
       window.scrollTo({ top: window.pageYOffset + delta, behavior: "auto" });
       html.style.scrollBehavior = previousScrollBehavior;
 
-      if (Date.now() - settleStartedAt < 2800) {
-        window.setTimeout(settle, 180);
+      if (Date.now() - settleStartedAt < 1200) {
+        anchorSettleTimers.push(window.setTimeout(settle, 160));
+        return;
       }
+
+      releaseScrollCapture();
     };
 
-    window.setTimeout(settle, 240);
-    window.setTimeout(settle, 900);
-    window.setTimeout(settle, 1800);
+    window.addEventListener("wheel", interruptAnchorSettle, { passive: true });
+    window.addEventListener("touchstart", interruptAnchorSettle, { passive: true });
+    window.addEventListener("pointerdown", interruptAnchorSettle, { passive: true });
+    window.addEventListener("keydown", interruptAnchorSettle);
+
+    anchorSettleTimers.push(window.setTimeout(settle, 220));
+    anchorSettleTimers.push(window.setTimeout(settle, 640));
   }
 
   function applyPendingCrossPageScroll() {
@@ -985,13 +1047,24 @@ export default function initSite() {
     revealObserver.observe(item);
   });
 
+  function normalizeCounterSuffix(suffix) {
+    const rawSuffix = String(suffix || "");
+    const trimmedSuffix = rawSuffix.trim();
+    if (!trimmedSuffix) {
+      return "";
+    }
+    return /^\s/.test(rawSuffix) || /^[A-Za-zА-Яа-яЁё]/.test(trimmedSuffix)
+      ? `\u00A0${trimmedSuffix}`
+      : trimmedSuffix;
+  }
+
   function formatCounter(value, decimals, suffix) {
     const safe = Number.isFinite(value) ? value : 0;
     const formatted = safe.toLocaleString("ru-RU", {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     });
-    return String(formatted) + (suffix || "");
+    return String(formatted) + normalizeCounterSuffix(suffix);
   }
 
   function animateCounter(element) {
@@ -1794,13 +1867,37 @@ export default function initSite() {
 
     if (safeModalId === "formats") {
       const recommendation = document.body.getAttribute("data-formats-recommendation") || "";
+      const formatsView = document.body.getAttribute("data-formats-view") || "";
       const formatCards = $$(".format-showcase-card", targetModal);
+      const formatsGrid = $(".format-showcase", targetModal);
+      const titleNode = $("#formatsTitle", targetModal);
+      const leadNode = $(".formats-modal-lead", targetModal);
+
+      if (titleNode && !titleNode.dataset.defaultHtml) {
+        titleNode.dataset.defaultHtml = titleNode.innerHTML;
+      }
+      if (leadNode && !leadNode.dataset.defaultText) {
+        leadNode.dataset.defaultText = leadNode.textContent || "";
+      }
+
       formatCards.forEach(function (card) {
         card.classList.remove("is-recommended");
+        card.hidden = false;
       });
+      targetModal.classList.remove("is-single-recommendation");
+      formatsGrid?.classList.remove("is-single-recommendation");
+
+      if (titleNode?.dataset.defaultHtml) {
+        titleNode.innerHTML = titleNode.dataset.defaultHtml;
+      }
+      if (leadNode?.dataset.defaultText) {
+        leadNode.textContent = leadNode.dataset.defaultText;
+      }
+
+      let matchedCard = null;
 
       if (recommendation) {
-        const matchedCard = formatCards.find(function (card) {
+        matchedCard = formatCards.find(function (card) {
           const title = (card.querySelector("h4")?.textContent || "").toLowerCase();
           if (recommendation === "session") {
             return title.indexOf("управленчес") !== -1;
@@ -1813,13 +1910,32 @@ export default function initSite() {
           }
           return false;
         });
+      }
 
-        if (matchedCard) {
-          matchedCard.classList.add("is-recommended");
-          window.requestAnimationFrame(function () {
-            matchedCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
-          });
+      if (matchedCard && formatsView === "recommended-only") {
+        formatCards.forEach(function (card) {
+          card.hidden = card !== matchedCard;
+        });
+        matchedCard.classList.add("is-recommended");
+        targetModal.classList.add("is-single-recommendation");
+        formatsGrid?.classList.add("is-single-recommendation");
+
+        if (titleNode) {
+          titleNode.textContent = "Рекомендуемый формат";
         }
+        if (leadNode) {
+          const cardTitle = matchedCard.querySelector("h4")?.textContent?.trim() || "";
+          const cardDuration = matchedCard.querySelector(".format-showcase-duration")?.textContent?.trim() || "";
+          leadNode.textContent = [cardTitle, cardDuration].filter(Boolean).join(" — ");
+        }
+      } else if (matchedCard) {
+        matchedCard.classList.add("is-recommended");
+      }
+
+      if (matchedCard) {
+        window.requestAnimationFrame(function () {
+          matchedCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+        });
       }
     }
   }
@@ -1840,6 +1956,7 @@ export default function initSite() {
     modalLayer.classList.remove("is-open");
     modalLayer.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
+    document.body.removeAttribute("data-formats-view");
     syncHeaderVisualState();
   }
 
@@ -1866,6 +1983,11 @@ export default function initSite() {
     } else {
       document.body.removeAttribute("data-formats-recommendation");
     }
+    if (requestedModal.formatsView) {
+      document.body.setAttribute("data-formats-view", requestedModal.formatsView);
+    } else {
+      document.body.removeAttribute("data-formats-view");
+    }
 
     requestAnimationFrame(function () {
       openModal(requestedModal.modal);
@@ -1874,6 +1996,7 @@ export default function initSite() {
         const nextUrl = new URL(window.location.href);
         nextUrl.searchParams.delete("modal");
         nextUrl.searchParams.delete("recommendation");
+        nextUrl.searchParams.delete("formatsView");
         const nextPath = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
         window.history.replaceState({}, "", nextPath);
       } catch {
@@ -2109,9 +2232,17 @@ export default function initSite() {
 
   const contactForm = $("#contactForm");
   if (contactForm) {
+    contactForm.setAttribute("novalidate", "novalidate");
     const submitBtn = $("button[type='submit']", contactForm);
     const statusNode = $("#contactFormStatus", contactForm);
     const defaultSubmitLabel = submitBtn ? String(submitBtn.textContent || "Отправить").trim() || "Отправить" : "Отправить";
+    const validationMessages = {
+      name: "Введите имя.",
+      contact_required: "Укажите email.",
+      contact_invalid: "Проверьте корректность email.",
+      message: "Напишите ваш вопрос.",
+      policy: "Подтвердите согласие на обработку персональных данных."
+    };
 
     function setFormStatus(text, state) {
       if (!statusNode) {
@@ -2125,17 +2256,137 @@ export default function initSite() {
       }
     }
 
-    contactForm.addEventListener("input", function () {
+    function getFieldContainer(field) {
+      return field.closest(".contact-field") || field.closest(".contact-check") || field.parentElement;
+    }
+
+    function getFieldErrorNode(field) {
+      const container = getFieldContainer(field);
+      if (!container) {
+        return null;
+      }
+      let errorNode = $(".contact-field-error", container);
+      if (errorNode) {
+        return errorNode;
+      }
+      errorNode = document.createElement("span");
+      errorNode.className = "contact-field-error";
+      errorNode.setAttribute("aria-live", "polite");
+      container.appendChild(errorNode);
+      return errorNode;
+    }
+
+    function clearFieldError(field) {
+      const container = getFieldContainer(field);
+      if (!container) {
+        return;
+      }
+      container.removeAttribute("data-invalid");
+      field.removeAttribute("aria-invalid");
+      const errorNode = $(".contact-field-error", container);
+      if (errorNode) {
+        errorNode.textContent = "";
+      }
+    }
+
+    function setFieldError(field, message) {
+      const container = getFieldContainer(field);
+      const errorNode = getFieldErrorNode(field);
+      if (!container || !errorNode) {
+        return;
+      }
+      container.setAttribute("data-invalid", "true");
+      field.setAttribute("aria-invalid", "true");
+      errorNode.textContent = message;
+    }
+
+    function getFieldValidationMessage(field) {
+      if (!field) {
+        return "";
+      }
+
+      if (field.name === "name" && !String(field.value || "").trim()) {
+        return validationMessages.name;
+      }
+
+      if (field.name === "contact") {
+        const value = String(field.value || "").trim();
+        if (!value) {
+          return validationMessages.contact_required;
+        }
+        if (field.validity && field.validity.typeMismatch) {
+          return validationMessages.contact_invalid;
+        }
+      }
+
+      if (field.name === "message" && !String(field.value || "").trim()) {
+        return validationMessages.message;
+      }
+
+      if (field.name === "policy" && !field.checked) {
+        return validationMessages.policy;
+      }
+
+      return "";
+    }
+
+    function validateField(field) {
+      const message = getFieldValidationMessage(field);
+      if (!message) {
+        clearFieldError(field);
+        return true;
+      }
+      setFieldError(field, message);
+      return false;
+    }
+
+    function validateContactForm() {
+      const fields = $$("input[name='name'], input[name='contact'], textarea[name='message'], input[name='policy']", contactForm);
+      let firstInvalidField = null;
+      fields.forEach(function (field) {
+        const isValid = validateField(field);
+        if (!isValid && !firstInvalidField) {
+          firstInvalidField = field;
+        }
+      });
+      return firstInvalidField;
+    }
+
+    contactForm.addEventListener("input", function (event) {
       if (!statusNode || !statusNode.textContent) {
+        const field = event.target instanceof HTMLElement ? event.target : null;
+        if (field && (field.matches("input, textarea") || field.matches("select"))) {
+          clearFieldError(field);
+        }
         return;
       }
       setFormStatus("", "");
+      const field = event.target instanceof HTMLElement ? event.target : null;
+      if (field && (field.matches("input, textarea") || field.matches("select"))) {
+        clearFieldError(field);
+      }
+    });
+
+    contactForm.addEventListener("change", function (event) {
+      const field = event.target instanceof HTMLElement ? event.target : null;
+      if (field && (field.matches("input, textarea") || field.matches("select"))) {
+        validateField(field);
+      }
     });
 
     contactForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       if (!submitBtn || submitBtn.disabled) {
+        return;
+      }
+
+      const firstInvalidField = validateContactForm();
+      if (firstInvalidField) {
+        setFormStatus("Проверьте поля формы и попробуйте снова.", "error");
+        if (typeof firstInvalidField.focus === "function") {
+          firstInvalidField.focus();
+        }
         return;
       }
 
@@ -2190,6 +2441,7 @@ export default function initSite() {
         }
 
         contactForm.reset();
+        $$("input, textarea", contactForm).forEach(clearFieldError);
         setFormStatus("Заявка отправлена. Мы свяжемся с вами в рабочее время.", "success");
         submitBtn.textContent = "Отправлено";
         setTimeout(function () {

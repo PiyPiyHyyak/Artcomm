@@ -718,11 +718,10 @@ function normalizeMediaStationReviewsModal(content) {
     return false;
   }
 
-  const reviewPhotoByName = new Map([
-    ["ольга петрова", "/assets/reviews/olga-petrova.svg"],
-    ["елена светлова", "/assets/reviews/elena-svetlova.svg"],
-    ["ульяна реброва", "/assets/reviews/ulyana-rebrova.svg"]
-  ]);
+  const normalizeReviewQuoteText = (text) =>
+    String(text || "")
+      .replace(/\.(\s*»)/g, "$1")
+      .replace(/\.\s*$/g, "");
 
   const formatsMethodologyButton =
     '\n        <div class="formats-modal-actions">\n          <a class="btn btn-secondary" href="/?modal=methodology" data-modal="methodology">Узнать методологию</a>\n        </div>';
@@ -750,7 +749,7 @@ function normalizeMediaStationReviewsModal(content) {
     const rawTitle = String(entry.title || "").trim();
     const needsTitleUpgrade = rawTitle === "Участники о проекте" || rawTitle === "Отзывы участников";
 
-    // No review cards at all — restore the default (which now includes speaker photos).
+    // No review cards at all — restore clean default text cards.
     if (!rawBodyHtml.includes("modal-review-card")) {
       changed = true;
       return {
@@ -760,21 +759,29 @@ function normalizeMediaStationReviewsModal(content) {
       };
     }
 
-    // Ensure every known speaker card carries their photo, while preserving edited text.
+    // Preserve review photos and only normalize the text content.
     const upgradedBodyHtml = rawBodyHtml.replace(
       /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
-      (match, innerHtml) => {
+      (_match, innerHtml) => {
+        const imageMatch = innerHtml.match(/<img\b[^>]*src=["']([^"']+)["'][^>]*alt=["']([^"']*)["'][^>]*>/i)
+          || innerHtml.match(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/i);
+        const imageSrc = imageMatch ? String(imageMatch[1] || "").trim() : "";
+        const hasRealImage = Boolean(imageSrc);
         const copyHtml = innerHtml
-          .replace(/<div class=["']modal-review-media["'][^>]*>[\s\S]*?<\/div>\s*<\/div>\s*/gi, "")
+          .replace(/<div class=["']modal-review-media["'][^>]*>[\s\S]*?<\/div>\s*/gi, "")
+          .replace(/<div class=["']modal-review-avatar-empty["'][^>]*>[\s\S]*?<\/div>\s*/gi, "")
           .replace(/<div class=["']modal-review-media["'][^>]*>\s*<img\b[^>]*>\s*<\/div>\s*/gi, "")
+          .replace(
+            /(<p\b[^>]*class=["'][^"']*modal-review-text[^"']*["'][^>]*>)([\s\S]*?)(<\/p>)/gi,
+            (_match, openTag, text, closeTag) => `${openTag}${normalizeReviewQuoteText(text)}${closeTag}`
+          )
           .trim();
-        const nameMatch = copyHtml.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
-        const displayName = nameMatch ? nameMatch[1].replace(/<[^>]*>/g, "").trim() : "";
-        const photo = reviewPhotoByName.get(displayName.toLowerCase());
-        if (!photo) {
+        if (!hasRealImage) {
           return `<article class="modal-review-card">${copyHtml}</article>`;
         }
-        const media = `<div class="modal-review-media"><img src="${photo}" alt="${displayName}" loading="lazy"></div>`;
+        const nameMatch = copyHtml.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
+        const displayName = nameMatch ? nameMatch[1].replace(/<[^>]*>/g, "").trim() : "";
+        const media = `<div class="modal-review-media"><img src="${imageSrc}" alt="${displayName}" loading="lazy"></div>`;
         return `<article class="modal-review-card has-media">${media}${copyHtml}</article>`;
       }
     );
@@ -1291,13 +1298,16 @@ function sanitizeFolderPath(value) {
     return "";
   }
 
-  const segments = raw
-    .split("/")
-    .map((segment) => segment.trim())
-    .filter(Boolean)
-    .map((segment) => segment.replace(/[^a-z0-9_-]/g, ""));
+  const segments = raw.split("/");
+  if (
+    !segments.length ||
+    segments.length > 6 ||
+    segments.some((segment) => !/^[a-z0-9_-]{1,64}$/.test(segment))
+  ) {
+    throw new Error("invalid_path");
+  }
 
-  return segments.filter(Boolean).slice(0, 6).join("/");
+  return segments.join("/");
 }
 
 function sanitizeFileName(value) {
@@ -1362,6 +1372,30 @@ function ensureAssetsPath(filePath) {
   }
 
   return value;
+}
+
+function isPathInside(baseDir, targetPath) {
+  const base = path.resolve(baseDir);
+  const target = path.resolve(targetPath);
+  return target === base || target.startsWith(base + path.sep);
+}
+
+function resolveAssetsDirectory(assetsDir, folder = "") {
+  const base = path.resolve(assetsDir);
+  const target = path.resolve(base, folder || ".");
+  if (!isPathInside(base, target)) {
+    throw new Error("invalid_path");
+  }
+  return target;
+}
+
+function resolveAssetFilePath(assetsDir, relativePath) {
+  const base = path.resolve(assetsDir);
+  const target = path.resolve(base, relativePath);
+  if (!isPathInside(base, target) || target === base) {
+    throw new Error("invalid_path");
+  }
+  return target;
 }
 
 async function resolveUniqueAssetName(assetsDir, fileName) {
@@ -1494,17 +1528,27 @@ export function createCmsApiHandler(options = {}) {
 
   async function readState() {
     await ensureStateFile();
+    let raw;
     try {
-      const raw = await fsp.readFile(stateFile, "utf8");
-      const parsed = JSON.parse(raw);
-      const normalized = normalizeState(parsed, securityConfig);
-      if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
-        await fsp.writeFile(stateFile, JSON.stringify(normalized, null, 2));
-      }
-      return normalized;
-    } catch {
-      return normalizeState(createBaseState(securityConfig), securityConfig);
+      raw = await fsp.readFile(stateFile, "utf8");
+    } catch (error) {
+      // Ошибки доступа нельзя подменять пустым состоянием: иначе редактор сообщает
+      // об успешном сохранении, хотя данные не были записаны на диск.
+      throw error;
     }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      throw new Error("state_corrupted");
+    }
+
+    const normalized = normalizeState(parsed, securityConfig);
+    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      await fsp.writeFile(stateFile, JSON.stringify(normalized, null, 2));
+    }
+    return normalized;
   }
 
   async function ensureVersionsStorage() {
@@ -1734,7 +1778,7 @@ export function createCmsApiHandler(options = {}) {
     const snapshot = options && options.snapshot && typeof options.snapshot === "object" ? options.snapshot : null;
     let snapshotEntry = null;
 
-    writeChain = writeChain
+    const writeOperation = writeChain
       .then(async () => {
         await ensureStateFile();
         const tempFile = `${stateFile}.tmp`;
@@ -1744,13 +1788,16 @@ export function createCmsApiHandler(options = {}) {
           // Снапшот создаётся строго после успешной записи state — в архив не попадает "битая" версия.
           snapshotEntry = await createVersionSnapshot(next, snapshot);
         }
-      })
-      .catch(() => {});
+      });
+
+    // Ошибку текущего запроса возвращаем клиенту, но не блокируем последующие
+    // попытки записи после устранения причины (например, прав на каталог).
+    writeChain = writeOperation.catch(() => undefined);
 
     if (options.withMeta) {
-      return writeChain.then(() => ({ state: next, snapshot: snapshotEntry }));
+      return writeOperation.then(() => ({ state: next, snapshot: snapshotEntry }));
     }
-    return writeChain.then(() => next);
+    return writeOperation.then(() => next);
   }
 
   function cleanupExpiredSessions() {
@@ -2740,12 +2787,14 @@ export function createCmsApiHandler(options = {}) {
         assertMimeAllowed(mime, extension);
         assertFileSizeAllowed(extension, buffer.length);
 
-        const targetDir = folder ? path.join(assetsDir, folder) : assetsDir;
+        const targetDir = resolveAssetsDirectory(assetsDir, folder);
         await fsp.mkdir(targetDir, { recursive: true });
+        await fsp.chmod(targetDir, 0o755).catch(() => {});
         const finalName = await resolveUniqueAssetName(targetDir, fileName);
-        const absoluteFile = path.join(targetDir, finalName);
+        const absoluteFile = resolveAssetFilePath(targetDir, finalName);
         const relativeAssetPath = folder ? `/assets/${folder}/${finalName}` : `/assets/${finalName}`;
         await fsp.writeFile(absoluteFile, buffer);
+        await fsp.chmod(absoluteFile, 0o644).catch(() => {});
 
         sendJson(res, 200, { ok: true, path: relativeAssetPath });
         return true;
@@ -2764,12 +2813,7 @@ export function createCmsApiHandler(options = {}) {
         const body = await readJsonBody(req);
         const assetPath = ensureAssetsPath(body.path);
         const relativePath = assetPath.slice("/assets/".length);
-        const absoluteFile = path.resolve(assetsDir, relativePath);
-
-        if (!absoluteFile.startsWith(path.resolve(assetsDir) + path.sep) && absoluteFile !== path.resolve(assetsDir)) {
-          sendJson(res, 400, { ok: false, error: "invalid_path" });
-          return true;
-        }
+        const absoluteFile = resolveAssetFilePath(assetsDir, relativePath);
 
         try {
           await fsp.unlink(absoluteFile);

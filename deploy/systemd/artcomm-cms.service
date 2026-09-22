@@ -14,6 +14,11 @@ Environment=CMS_PORT=8787
 Environment=CMS_ROOT_DIR=/var/www/Artcomm
 Environment=ARTCOMM_CMS_DATA_DIR=/var/lib/artcomm-cms
 Environment=ARTCOMM_CMS_ASSETS_DIR=/var/www/html/assets
+ExecStartPre=+/usr/bin/install -d -o www-data -g www-data -m 0750 /var/lib/artcomm-cms
+ExecStartPre=+/usr/bin/install -d -o www-data -g www-data -m 0755 /var/www/html/assets
+ExecStartPre=+/usr/bin/chown -R www-data:www-data /var/lib/artcomm-cms /var/www/html/assets
+ExecStartPre=+/usr/bin/find /var/www/html/assets -type d -exec /usr/bin/chmod 0755 {} +
+ExecStartPre=+/usr/bin/find /var/www/html/assets -type f -exec /usr/bin/chmod 0644 {} +
 ExecStart=/usr/bin/env node /var/www/Artcomm/cmsServer.js
 Restart=always
 RestartSec=3

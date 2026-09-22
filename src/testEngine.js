@@ -230,15 +230,15 @@ export function mountProblemTest({
     kicker.textContent = "Тест завершён";
 
     const title = document.createElement("h3");
-    title.textContent = "Форматы, которые подойдут вашей команде";
+    title.textContent = "Рекомендация готова";
 
     const resultLead = document.createElement("p");
     resultLead.className = "test-result-meta";
-    resultLead.textContent = "Мы уже отметили наиболее подходящий вариант в подборке.";
+    resultLead.textContent = `${recommendation.title} — ${recommendation.duration}`;
 
     const summary = document.createElement("p");
     summary.className = "test-result-note";
-    summary.textContent = "Откройте форматы, чтобы спокойно сравнить все варианты, или пройдите тест заново, если хотите изменить ответы.";
+    summary.textContent = "По вашим ответам мы подобрали один формат. Откройте рекомендацию или пройдите тест заново, если хотите изменить ответы.";
 
     const actions = document.createElement("div");
     actions.className = "test-result-actions";
@@ -246,7 +246,7 @@ export function mountProblemTest({
     const formatButton = document.createElement("button");
     formatButton.type = "button";
     formatButton.className = "btn btn-primary";
-    formatButton.textContent = "Посмотреть форматы";
+    formatButton.textContent = "Открыть рекомендацию";
     formatButton.addEventListener("click", () => {
       if (typeof onShowFormat === "function") {
         onShowFormat({

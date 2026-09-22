@@ -292,8 +292,8 @@ const aboutMarkup = String.raw`
               <div class="footer-links footer-links-contacts">
                 <a href="mailto:info@artcommrf.ru">info@artcommrf.ru</a>
                 <a href="tel:+79503545558">+7 (950) 354-55-58</a>
-                <a href="https://t.me" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
-                <a href="https://max.ru" target="_blank" rel="noopener noreferrer">Написать в Max</a>
+                <a href="https://t.me/Roman_Artcomm" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+                <a href="https://max.ru/u/f9LHodD0cOJAavfhRz2Mfdw5qIZrEe6ig0wWdSnQVo3RlezuThrzgmFCJtQ" target="_blank" rel="noopener noreferrer">Написать в Max</a>
                 <a href="/">Вернуться на главную</a>
               </div>
             </div>

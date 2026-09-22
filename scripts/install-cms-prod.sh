@@ -12,8 +12,11 @@ if [ ! -f "$SERVICE_SRC" ]; then
 fi
 
 install -D -m 0644 "$SERVICE_SRC" "$SERVICE_DST"
-mkdir -p /var/lib/artcomm-cms /var/www/html/assets
+install -d -o www-data -g www-data -m 0750 /var/lib/artcomm-cms
+install -d -o www-data -g www-data -m 0755 /var/www/html/assets
 chown -R www-data:www-data /var/lib/artcomm-cms /var/www/html/assets
+find /var/www/html/assets -type d -exec chmod 0755 {} +
+find /var/www/html/assets -type f -exec chmod 0644 {} +
 
 systemctl daemon-reload
 systemctl enable --now "$SERVICE_NAME"

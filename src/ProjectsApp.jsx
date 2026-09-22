@@ -3,6 +3,19 @@ import { fetchPublishedContentFromServer, getPublishedContent } from "./cms/stor
 import { sanitizeHtmlFragment, sanitizeSrc } from "./cms/security";
 import { buildFastVideoSource, isSafariLikeBrowser } from "./videoSources";
 
+function formatStatValue(value, suffix) {
+  const rawValue = String(value ?? "").trim();
+  const rawSuffix = String(suffix || "");
+  const trimmedSuffix = rawSuffix.trim();
+  if (!trimmedSuffix) {
+    return rawValue;
+  }
+  const needsSpaceBeforeSuffix =
+    /\d$/.test(rawValue) &&
+    (/^\s/.test(rawSuffix) || /^[A-Za-zА-Яа-яЁё]/.test(trimmedSuffix));
+  return `${rawValue}${needsSpaceBeforeSuffix ? "\u00A0" : ""}${trimmedSuffix}`;
+}
+
 function getFallbackContent() {
   try {
     return getPublishedContent();
@@ -198,10 +211,7 @@ export default function ProjectsApp() {
               <div className="projects-stats-grid">
                 {projectStats.map((item) => (
                   <article className="projects-stat-card" key={item.id || `${item.label}-${item.value}`}>
-                    <strong>
-                      {item.value}
-                      {item.suffix || ""}
-                    </strong>
+                    <strong>{formatStatValue(item.value, item.suffix)}</strong>
                     <span>{item.label}</span>
                   </article>
                 ))}

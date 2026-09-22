@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ROLE_ADMIN,
   ROLE_EDITOR,
@@ -26,6 +26,7 @@ import {
   setSecurityCodeword,
   setUserPassword,
   setUsersRemote,
+  subscribeToDraftSyncErrors,
   verifySensitiveGate
 } from "./cms/storage";
 import { sanitizeSrc } from "./cms/security";
@@ -1349,31 +1350,41 @@ function cloneDefaultFormatsCards() {
 
 const DEFAULT_MEDIASTATION_REVIEW_CARDS = [
   {
-    image: "",
+    image: "/assets/reviews/ольга-петрова.jpg",
     alt: "Ольга Петрова",
     name: "Ольга Петрова",
-    meta: "Заместитель министра науки РФ",
+    meta: "Заместитель министра науки и образования РФ",
     quote:
-      "«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»"
+      "«Приятно видеть, когда формируется не просто команда, а семья — семья медийщиков, объединенных одной задачей»"
   },
   {
-    image: "",
+    image: "/assets/reviews/елена-светлова.jpg",
     alt: "Елена Светлова",
     name: "Елена Светлова",
     meta: "Озёрск",
-    quote: "«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»"
+    quote:
+      "«Я ехала с легким скепсисом, но эта командировка вытащила мой мозг, встряхнула и вставила обратно: сегодня я ощущаю себя специалистом на голову выше»"
   },
   {
-    image: "",
+    image: "/assets/reviews/photo_2026-08-09-16.13.24.jpeg",
     alt: "Ульяна Реброва",
     name: "Ульяна Реброва",
     meta: "Полярные Зори",
-    quote: "«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»"
+    quote:
+      "«Мы влюбляемся заново в свои города и влюбляем в них людей. Открываем новые таланты в себе и коллегах. Медиастанция — это уже сильно больше, чем просто про работу»"
   }
 ];
 
 function cloneDefaultReviewCards() {
   return DEFAULT_MEDIASTATION_REVIEW_CARDS.map((card) => ({ ...card }));
+}
+
+function getDefaultReviewCardByName(name) {
+  const normalizedName = String(name || "").trim().toLowerCase();
+  if (!normalizedName) {
+    return null;
+  }
+  return DEFAULT_MEDIASTATION_REVIEW_CARDS.find((card) => String(card.name || "").trim().toLowerCase() === normalizedName) || null;
 }
 
 const DEFAULT_TEAM_MODAL_MEMBERS = [
@@ -1488,7 +1499,18 @@ function parseModalBodyForEditor(modalId, bodyHtml) {
           name: (item.querySelector("h4")?.textContent || "").trim(),
           meta: (item.querySelector(".modal-review-meta")?.textContent || "").trim(),
           quote: (item.querySelector(".modal-review-text")?.textContent || "").trim()
-        }))
+        })).map((card) => {
+          const fallback = getDefaultReviewCardByName(card.name);
+          if (!fallback || card.image) {
+            return card;
+          }
+          return {
+            ...fallback,
+            ...card,
+            image: fallback.image,
+            alt: card.alt || fallback.alt
+          };
+        })
       : [];
 
     return {
@@ -1889,12 +1911,22 @@ function TeamMembersModalEditor({
 }) {
   const cards = Array.isArray(editorData.cards) && editorData.cards.length ? editorData.cards : cloneDefaultTeamMembers();
 
-  function updateCards(nextCards) {
-    onChange({ cards: nextCards });
+  function updateCards(nextCardsOrFactory) {
+    onChange((currentData) => {
+      const currentCards =
+        Array.isArray(currentData?.cards) && currentData.cards.length
+          ? currentData.cards
+          : cloneDefaultTeamMembers();
+      const nextCards =
+        typeof nextCardsOrFactory === "function" ? nextCardsOrFactory(currentCards) : nextCardsOrFactory;
+      return { ...currentData, cards: nextCards };
+    });
   }
 
   function updateCard(index, patch) {
-    updateCards(cards.map((card, cardIndex) => (cardIndex === index ? { ...card, ...patch } : { ...card })));
+    updateCards((currentCards) =>
+      currentCards.map((card, cardIndex) => (cardIndex === index ? { ...card, ...patch } : { ...card }))
+    );
   }
 
   return (
@@ -2059,12 +2091,22 @@ function ReviewCardsModalEditor({
 }) {
   const cards = Array.isArray(editorData.cards) && editorData.cards.length ? editorData.cards : cloneDefaultReviewCards();
 
-  function updateCards(nextCards) {
-    onChange({ cards: nextCards });
+  function updateCards(nextCardsOrFactory) {
+    onChange((currentData) => {
+      const currentCards =
+        Array.isArray(currentData?.cards) && currentData.cards.length
+          ? currentData.cards
+          : cloneDefaultReviewCards();
+      const nextCards =
+        typeof nextCardsOrFactory === "function" ? nextCardsOrFactory(currentCards) : nextCardsOrFactory;
+      return { ...currentData, cards: nextCards };
+    });
   }
 
   function updateCard(index, patch) {
-    updateCards(cards.map((card, cardIndex) => (cardIndex === index ? { ...card, ...patch } : { ...card })));
+    updateCards((currentCards) =>
+      currentCards.map((card, cardIndex) => (cardIndex === index ? { ...card, ...patch } : { ...card }))
+    );
   }
 
   return (
@@ -2198,16 +2240,23 @@ function ReviewCardsModalEditor({
 }
 
 function ModalBodyEditor({ entry, readonly, onChange, localPreviewMap, onPickPreview, onUploadFile, onDeleteFile }) {
-  const editorData = useMemo(
-    () => parseModalBodyForEditor(entry.id, entry.bodyHtml),
-    [entry.id, entry.bodyHtml]
-  );
+  const [editorData, setEditorData] = useState(() => parseModalBodyForEditor(entry.id, entry.bodyHtml));
+
+  useEffect(() => {
+    setEditorData(parseModalBodyForEditor(entry.id, entry.bodyHtml));
+  }, [entry.id, entry.bodyHtml]);
 
   const kind = editorData.kind;
-  const updateBody = (patch) => {
-    const nextData = { ...editorData, ...patch };
-    onChange(buildModalBodyFromEditor(entry.id, nextData));
-  };
+  const updateBody = useCallback((patchOrFactory) => {
+    setEditorData((currentData) => {
+      const nextData =
+        typeof patchOrFactory === "function"
+          ? patchOrFactory(currentData)
+          : { ...currentData, ...patchOrFactory };
+      onChange(buildModalBodyFromEditor(entry.id, nextData));
+      return nextData;
+    });
+  }, [entry.id, onChange]);
 
   if (kind === "ms-results") {
     return (
@@ -2408,8 +2457,10 @@ export default function AdminApp() {
   const [versionsState, setVersionsState] = useState({ list: [], limit: null, loadedAt: null, loading: false });
   const [versionActionBusyId, setVersionActionBusyId] = useState("");
   const feedbackTimerRef = useRef(null);
+  const cmsStateRef = useRef(cmsState);
 
   const draft = cmsState.draft;
+  const draftRef = useRef(draft);
   const readonly = !session || !canEdit(session.role);
   const editLocked = readonly || isProcessingFiles;
   const canPublishNow = session && canPublish(session.role);
@@ -2422,6 +2473,14 @@ export default function AdminApp() {
     () => NAV_ITEMS.filter((item) => item.key !== "users" || canManageUsersNow),
     [canManageUsersNow]
   );
+
+  useEffect(() => {
+    cmsStateRef.current = cmsState;
+  }, [cmsState]);
+
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
   useEffect(() => {
     if (tab === "users" && !canManageUsersNow) {
@@ -2529,6 +2588,13 @@ export default function AdminApp() {
   }, [session]);
 
   useEffect(() => {
+    return subscribeToDraftSyncErrors((error) => {
+      const message = error instanceof Error ? error.message : "draft_sync_failed";
+      setFeedback(`Не удалось сохранить изменения на сервере: ${message}`);
+    });
+  }, []);
+
+  useEffect(() => {
     if (!session) {
       setVersionsState({ list: [], limit: null, loadedAt: null, loading: false });
       return;
@@ -2623,7 +2689,8 @@ export default function AdminApp() {
       return;
     }
     // Любое изменение в форме сразу сохраняется в черновик.
-    const nextDraft = mutator(cloneDeep(draft));
+    const baseDraft = cloneDeep(draftRef.current || cmsStateRef.current?.draft || draft);
+    const nextDraft = mutator(baseDraft);
     const nextState = saveDraft(() => nextDraft);
     syncState(nextState, message);
   }

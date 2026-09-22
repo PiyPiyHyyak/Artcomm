@@ -79,7 +79,6 @@ const homeMarkup = String.raw`
           <div class="common-redo-left">
             <div class="common-test-shell">
               <header class="section-head common-test-head">
-                <p class="section-kicker">Короткий тест</p>
                 <h2>
                   <span>Короткий тест</span>
                   <span>для управленческой команды</span>
@@ -133,7 +132,7 @@ const homeMarkup = String.raw`
       <div class="container ms-intro" data-reveal>
         <p class="section-kicker">Флагманский проект</p>
         <h2>«МедиаСтанция»</h2>
-        <p class="section-sub">Практика, где коммуникация становится рабочим инструментом управления командами.</p>
+        <p class="section-sub">Создаем доверие и ускоряем процессы внутри больших распределенных команд</p>
       </div>
 
       <div class="ms-pin-shell" id="msPinShell">
@@ -154,15 +153,15 @@ const homeMarkup = String.raw`
       </div>
 
       <div class="container ms-story">
-        <article class="ms-story-lead" data-reveal>
-          <h3>Ускоряем рабочие договорённости внутри больших распределённых команд</h3>
-          <p>Собираем единый коммуникационный ритм для людей из разных городов и контуров управления.</p>
+        <article class="ms-story-lead" data-reveal hidden>
+          <h3></h3>
+          <p></p>
         </article>
 
         <section class="ms-metric-line" data-reveal>
           <div class="ms-metric-main">
             <span class="metric-value" data-counter="76.9" data-suffix="%">76,9%</span>
-            <p>вовлечённости</p>
+            <p>вовлеченность</p>
           </div>
 
           <div class="ms-stats-list">
@@ -181,31 +180,11 @@ const homeMarkup = String.raw`
               <div class="loyalty-ring-wrap">
                 <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
                   <circle class="ring-track" cx="60" cy="60" r="46"></circle>
-                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="82"></circle>
+                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="88.6"></circle>
                 </svg>
-                <strong>82%</strong>
+                <strong>88,6%</strong>
               </div>
-              <p>Называю себя амбассадором</p>
-            </article>
-            <article class="loyalty-cell">
-              <div class="loyalty-ring-wrap">
-                <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
-                  <circle class="ring-track" cx="60" cy="60" r="46"></circle>
-                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="86"></circle>
-                </svg>
-                <strong>86%</strong>
-              </div>
-              <p>Стал увереннее размещать контент</p>
-            </article>
-            <article class="loyalty-cell">
-              <div class="loyalty-ring-wrap">
-                <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
-                  <circle class="ring-track" cx="60" cy="60" r="46"></circle>
-                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="92"></circle>
-                </svg>
-                <strong>92%</strong>
-              </div>
-              <p>Увеличилось кол-во связей</p>
+              <p>Я стал амбассадором Росатома</p>
             </article>
             <article class="loyalty-cell">
               <div class="loyalty-ring-wrap">
@@ -215,17 +194,27 @@ const homeMarkup = String.raw`
                 </svg>
                 <strong>93%</strong>
               </div>
-              <p>Быстрее договариваться</p>
+              <p>Стал увереннее размещать контент в соцсетях</p>
             </article>
             <article class="loyalty-cell">
               <div class="loyalty-ring-wrap">
                 <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
                   <circle class="ring-track" cx="60" cy="60" r="46"></circle>
-                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="95"></circle>
+                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="98"></circle>
                 </svg>
-                <strong>95%</strong>
+                <strong>98%</strong>
               </div>
-              <p>Проще решать проблемы</p>
+              <p>Увеличилось количество связей в моем городе</p>
+            </article>
+            <article class="loyalty-cell">
+              <div class="loyalty-ring-wrap">
+                <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring-track" cx="60" cy="60" r="46"></circle>
+                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="97"></circle>
+                </svg>
+                <strong>97%</strong>
+              </div>
+              <p>Проще решаю проблемы с коллегами из других городов</p>
             </article>
             <article class="loyalty-cell">
               <div class="loyalty-ring-wrap">
@@ -236,6 +225,16 @@ const homeMarkup = String.raw`
                 <strong>96%</strong>
               </div>
               <p>Ощущаем себя как команда</p>
+            </article>
+            <article class="loyalty-cell">
+              <div class="loyalty-ring-wrap">
+                <svg class="loyalty-ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring-track" cx="60" cy="60" r="46"></circle>
+                  <circle class="ring-progress" cx="60" cy="60" r="46" data-value="98"></circle>
+                </svg>
+                <strong>98%</strong>
+              </div>
+              <p>Чаще замечаю поводы гордости за Росатом</p>
             </article>
           </div>
         </section>
@@ -254,7 +253,7 @@ const homeMarkup = String.raw`
         <header class="iks-reset-head" data-reveal>
           <p class="section-kicker">Методология</p>
           <h2>Индекс коммуникационной состоятельности</h2>
-          <p>Переводим коммуникации из «ощущений» в управляемую систему, чтобы команда видела сильные стороны и точки ускорения решений.</p>
+          <p>Переводим коммуникации из «ощущений» в управляемую систему, чтобы команда видела сильные стороны и точки роста.</p>
         </header>
 
         <div class="iks-reset-stage">
@@ -290,6 +289,7 @@ const homeMarkup = String.raw`
             <div class="iks-chart-meta">
               <div class="iks-chart-legend" aria-hidden="true">
                 <span><i class="city-line"></i>Город (пример)</span>
+                <span><i class="avg-line"></i>Среднее по всем городам</span>
               </div>
             </div>
           </article>
@@ -337,7 +337,7 @@ const homeMarkup = String.raw`
           <div class="expert-copy-core">
             <p class="section-kicker">Наши эксперты</p>
             <h2>Роман Скудняков</h2>
-            <p class="expert-lead-quote">«Управляемость команды начинается с того, как она разговаривает и как принимает решения»</p>
+            <p class="expert-lead-quote">«Управляемость команды зависит от того, как она договаривается и принимает решения»</p>
             <p class="expert-brief">Стратегический коммуникатор и модератор управленческих команд в сложных распределённых структурах.</p>
 
             <ul class="positions">
@@ -372,8 +372,8 @@ const homeMarkup = String.raw`
             <p class="contacts-brief-schedule-value">пн-пт 9:00-18:00</p>
             <a class="contacts-brief-phone" href="tel:+79166920775">+7 (916) 692-07-75</a>
             <a class="contacts-brief-mail" href="mailto:info@artcommrf.ru">info@artcommrf.ru</a>
-            <a class="contacts-brief-telegram" href="https://t.me" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
-            <a class="contacts-brief-telegram" href="https://max.ru" target="_blank" rel="noopener noreferrer">Написать в Max</a>
+            <a class="contacts-brief-telegram" href="https://t.me/Roman_Artcomm" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+            <a class="contacts-brief-telegram" href="https://max.ru/u/f9LHodD0cOJAavfhRz2Mfdw5qIZrEe6ig0wWdSnQVo3RlezuThrzgmFCJtQ" target="_blank" rel="noopener noreferrer">Написать в Max</a>
           </article>
 
           <article class="contacts-info-card" data-reveal>
@@ -479,8 +479,8 @@ const homeMarkup = String.raw`
               <div class="footer-links footer-links-contacts">
                 <a href="mailto:info@artcommrf.ru">info@artcommrf.ru</a>
                 <a href="tel:+79166920775">+7 (916) 692-07-75</a>
-                <a href="https://t.me" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
-                <a href="https://max.ru" target="_blank" rel="noopener noreferrer">Написать в Max</a>
+                <a href="https://t.me/Roman_Artcomm" target="_blank" rel="noopener noreferrer">Написать в Telegram</a>
+                <a href="https://max.ru/u/f9LHodD0cOJAavfhRz2Mfdw5qIZrEe6ig0wWdSnQVo3RlezuThrzgmFCJtQ" target="_blank" rel="noopener noreferrer">Написать в Max</a>
               </div>
             </div>
           </section>
@@ -515,32 +515,32 @@ const homeMarkup = String.raw`
       <div class="modal-review-list">
         <article class="modal-review-card has-media">
           <div class="modal-review-media">
-            <img src="/assets/reviews/olga-petrova.svg" alt="Ольга Петрова" loading="lazy">
+            <img src="/assets/reviews/ольга-петрова.jpg" alt="Ольга Петрова" loading="lazy">
           </div>
           <div class="modal-review-copy">
             <h4>Ольга Петрова</h4>
-            <p class="modal-review-meta">Заместитель министра науки РФ</p>
-            <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
+            <p class="modal-review-meta">Заместитель министра науки и образования РФ</p>
+            <p class="modal-review-text">«Приятно видеть, когда формируется не просто команда, а семья — семья медийщиков, объединенных одной задачей»</p>
           </div>
         </article>
         <article class="modal-review-card has-media">
           <div class="modal-review-media">
-            <img src="/assets/reviews/elena-svetlova.svg" alt="Елена Светлова" loading="lazy">
+            <img src="/assets/reviews/елена-светлова.jpg" alt="Елена Светлова" loading="lazy">
           </div>
           <div class="modal-review-copy">
             <h4>Елена Светлова</h4>
             <p class="modal-review-meta">Озёрск</p>
-            <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
+            <p class="modal-review-text">«Я ехала с легким скепсисом, но эта командировка вытащила мой мозг, встряхнула и вставила обратно: сегодня я ощущаю себя специалистом на голову выше»</p>
           </div>
         </article>
         <article class="modal-review-card has-media">
           <div class="modal-review-media">
-            <img src="/assets/reviews/ulyana-rebrova.svg" alt="Ульяна Реброва" loading="lazy">
+            <img src="/assets/reviews/photo_2026-08-09-16.13.24.jpeg" alt="Ульяна Реброва" loading="lazy">
           </div>
           <div class="modal-review-copy">
             <h4>Ульяна Реброва</h4>
             <p class="modal-review-meta">Полярные Зори</p>
-            <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»</p>
+            <p class="modal-review-text">«Мы влюбляемся заново в свои города и влюбляем в них людей. Открываем новые таланты в себе и коллегах. Медиастанция — это уже сильно больше, чем просто про работу»</p>
           </div>
         </article>
       </div>
@@ -567,7 +567,7 @@ const homeMarkup = String.raw`
 
     <article class="modal" data-modal-id="formats" role="dialog" aria-modal="true" aria-labelledby="formatsTitle" hidden>
       <button class="modal-close" aria-label="Закрыть">×</button>
-      <h3 id="formatsTitle">Три формата — под любую задачу</h3>
+      <h3 id="formatsTitle"><span class="modal-title-line">Три формата — </span><span class="modal-title-line">под любую задачу</span></h3>
       <p class="formats-modal-lead">Выбирайте глубину погружения: от одной сессии до системной трансформации на год</p>
       <div class="modal-grid format-showcase">
         <article class="format-showcase-card">

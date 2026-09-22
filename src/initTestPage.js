@@ -10,7 +10,7 @@ export default function initTestPage() {
     resultNode: document.getElementById("testResult"),
     onShowFormat: ({ recommendation }) => {
       const key = encodeURIComponent(recommendation?.key || "session");
-      window.location.href = `/?modal=formats&recommendation=${key}`;
+      window.location.href = `/?modal=formats&recommendation=${key}&formatsView=recommended-only`;
     }
   });
 }

@@ -53,16 +53,16 @@ export const DEFAULT_CONTENT = {
     mediaStation: {
       kicker: "Флагманский проект",
       title: "«МедиаСтанция»",
-      subtitle: "Практика, где коммуникация становится рабочим инструментом управления командами.",
+      subtitle: "Создаем доверие и ускоряем процессы внутри больших распределенных команд",
       caption: "«Сенсация» — о форматах работы, от онлайна к офлайну.",
       videoDesktop: "/assets/gimn-ed-zy9mar.mp4",
       videoMobile: "/assets/gimn-ed-zy9mar.mp4",
       videoFallback: "/assets/gimn-ed-zy9mar.mp4",
-      storyTitle: "Ускоряем рабочие договорённости внутри больших распределённых команд",
-      storyText: "Собираем единый коммуникационный ритм для людей из разных городов и контуров управления.",
+      storyTitle: "",
+      storyText: "",
       metricValue: "76,9",
       metricSuffix: "%",
-      metricCaption: "вовлечённости",
+      metricCaption: "вовлеченность",
       stats: [
         { id: "ms-stat-1", value: "969", suffix: "", label: "участников", isPublished: true },
         { id: "ms-stat-2", value: "30", suffix: "", label: "городов", isPublished: true },
@@ -71,12 +71,12 @@ export const DEFAULT_CONTENT = {
         { id: "ms-stat-5", value: "5 200", suffix: "", label: "медиапродуктов", isPublished: true }
       ],
       loyalty: [
-        { id: "ms-loyalty-1", value: "82", label: "Называю себя амбассадором", isPublished: true },
-        { id: "ms-loyalty-2", value: "86", label: "Стал увереннее размещать контент", isPublished: true },
-        { id: "ms-loyalty-3", value: "92", label: "Увеличилось кол-во связей", isPublished: true },
-        { id: "ms-loyalty-4", value: "93", label: "Быстрее договариваться", isPublished: true },
-        { id: "ms-loyalty-5", value: "95", label: "Проще решать проблемы", isPublished: true },
-        { id: "ms-loyalty-6", value: "96", label: "Ощущаем себя как команда", isPublished: true }
+        { id: "ms-loyalty-1", value: "88,6", label: "Я стал амбассадором Росатома", isPublished: true },
+        { id: "ms-loyalty-2", value: "93", label: "Стал увереннее размещать контент в соцсетях", isPublished: true },
+        { id: "ms-loyalty-3", value: "98", label: "Увеличилось количество связей в моем городе", isPublished: true },
+        { id: "ms-loyalty-4", value: "97", label: "Проще решаю проблемы с коллегами из других городов", isPublished: true },
+        { id: "ms-loyalty-5", value: "96", label: "Ощущаем себя как команда", isPublished: true },
+        { id: "ms-loyalty-6", value: "98", label: "Чаще замечаю поводы гордости за Росатом", isPublished: true }
       ],
       actions: [
         { id: "ms-action-1", label: "Отзывы о МедиаСтанции", type: "modal", target: "ms-participants", variant: "primary", isPublished: true }
@@ -90,9 +90,9 @@ export const DEFAULT_CONTENT = {
       email: "info@artcommrf.ru",
       emailHref: "mailto:info@artcommrf.ru",
       telegramLabel: "Написать в Telegram",
-      telegramUrl: "https://t.me",
+      telegramUrl: "https://t.me/Roman_Artcomm",
       maxLabel: "Написать в Max",
-      maxUrl: "https://max.ru"
+      maxUrl: "https://max.ru/u/f9LHodD0cOJAavfhRz2Mfdw5qIZrEe6ig0wWdSnQVo3RlezuThrzgmFCJtQ"
     },
     trustedPartners: [
       { id: "trusted-1", name: "Росатом", logo: "/assets/logos/rosatom.png", x: 13, y: 16, range: 42, isPublished: true },
@@ -127,7 +127,7 @@ export const DEFAULT_CONTENT = {
     iks: {
       kicker: "Методология",
       title: "Индекс коммуникационной состоятельности",
-      description: "Переводим коммуникации из «ощущений» в управляемую систему, чтобы команда видела сильные стороны и точки ускорения решений.",
+      description: "Переводим коммуникации из «ощущений» в управляемую систему, чтобы команда видела сильные стороны и точки роста.",
       pillars: [
         { id: "pillar-1", key: "Организация и процессы", title: "Организация и процессы", text: "", isPublished: true },
         { id: "pillar-2", key: "Компетенции и роли", title: "Компетенции и роли", text: "", isPublished: true },
@@ -142,7 +142,7 @@ export const DEFAULT_CONTENT = {
     expert: {
       kicker: "Наши эксперты",
       title: "Роман Скудняков",
-      quote: "«Управляемость команды начинается с того, как она разговаривает и как принимает решения»",
+      quote: "«Управляемость команды зависит от того, как она договаривается и принимает решения»",
       brief: "Стратегический коммуникатор и модератор управленческих команд в сложных распределённых структурах.",
       photos: [
         { id: "expert-photo-1", image: "/assets/expert-1.jpg", alt: "Эксперт проекта Роман Скудняков", isPublished: true },
@@ -200,7 +200,7 @@ export const DEFAULT_CONTENT = {
       mutedLabel: "Выключить звук",
       reviewsLabel: "Отзывы о МедиаСтанции",
       extraStats: [
-        { id: "project-ms-stat-6", value: "76,9", suffix: "%", label: "вовлечённости" },
+        { id: "project-ms-stat-6", value: "76,9", suffix: "%", label: "вовлеченность" },
         { id: "project-ms-stat-7", value: "75,5", suffix: "%", label: "NPS" }
       ]
     },
@@ -237,32 +237,32 @@ export const DEFAULT_CONTENT = {
         <div class="modal-review-list">
           <article class="modal-review-card has-media">
             <div class="modal-review-media">
-              <img src="/assets/reviews/olga-petrova.svg" alt="Ольга Петрова" loading="lazy">
+              <img src="/assets/reviews/ольга-петрова.jpg" alt="Ольга Петрова" loading="lazy">
             </div>
             <div class="modal-review-copy">
               <h4>Ольга Петрова</h4>
-              <p class="modal-review-meta">Заместитель министра науки РФ</p>
-              <p class="modal-review-text">«Формат МедиаСтанции показал, что работа с коммуникациями напрямую влияет на скорость реализации решений и качество командного взаимодействия»</p>
+              <p class="modal-review-meta">Заместитель министра науки и образования РФ</p>
+              <p class="modal-review-text">«Приятно видеть, когда формируется не просто команда, а семья — семья медийщиков, объединенных одной задачей»</p>
             </div>
           </article>
           <article class="modal-review-card has-media">
             <div class="modal-review-media">
-              <img src="/assets/reviews/elena-svetlova.svg" alt="Елена Светлова" loading="lazy">
+              <img src="/assets/reviews/елена-светлова.jpg" alt="Елена Светлова" loading="lazy">
             </div>
             <div class="modal-review-copy">
               <h4>Елена Светлова</h4>
               <p class="modal-review-meta">Озёрск</p>
-              <p class="modal-review-text">«Я увидела, как командные договорённости становятся реальными действиями уже в первые недели»</p>
+              <p class="modal-review-text">«Я ехала с легким скепсисом, но эта командировка вытащила мой мозг, встряхнула и вставила обратно: сегодня я ощущаю себя специалистом на голову выше»</p>
             </div>
           </article>
           <article class="modal-review-card has-media">
             <div class="modal-review-media">
-              <img src="/assets/reviews/ulyana-rebrova.svg" alt="Ульяна Реброва" loading="lazy">
+              <img src="/assets/reviews/photo_2026-08-09-16.13.24.jpeg" alt="Ульяна Реброва" loading="lazy">
             </div>
             <div class="modal-review-copy">
               <h4>Ульяна Реброва</h4>
               <p class="modal-review-meta">Полярные Зори</p>
-              <p class="modal-review-text">«Проект дал нам язык, на котором можно обсуждать сложные задачи без конфликтов»</p>
+              <p class="modal-review-text">«Мы влюбляемся заново в свои города и влюбляем в них людей. Открываем новые таланты в себе и коллегах. Медиастанция — это уже сильно больше, чем просто про работу»</p>
             </div>
           </article>
         </div>

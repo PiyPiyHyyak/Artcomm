@@ -34,6 +34,8 @@ const REMOTE_DRAFT_SYNC_DELAY_MS = 450;
 let draftSyncTimer = null;
 let draftSyncPromise = Promise.resolve(null);
 let queuedDraftSnapshot = null;
+let lastDraftSyncError = null;
+const draftSyncErrorListeners = new Set();
 
 function nowIso() {
   return new Date().toISOString();
@@ -124,6 +126,25 @@ class CmsApiError extends Error {
     this.code = code || "cms_api_error";
     this.retryAt = retryAt;
   }
+}
+
+function notifyDraftSyncError(error) {
+  lastDraftSyncError = error instanceof Error ? error : new Error("draft_sync_failed");
+  draftSyncErrorListeners.forEach((listener) => {
+    try {
+      listener(lastDraftSyncError);
+    } catch {
+      // Ошибка обработчика интерфейса не должна останавливать синхронизацию CMS.
+    }
+  });
+}
+
+export function subscribeToDraftSyncErrors(listener) {
+  if (typeof listener !== "function") {
+    return () => {};
+  }
+  draftSyncErrorListeners.add(listener);
+  return () => draftSyncErrorListeners.delete(listener);
 }
 
 async function requestCms(path, { method = "GET", body, allowUnauthorized = false } = {}) {
@@ -484,11 +505,25 @@ function normalizeMediaStationReviewsModal(content) {
     return false;
   }
 
-  const reviewPhotoByName = new Map([
-    ["ольга петрова", "/assets/reviews/olga-petrova.svg"],
-    ["елена светлова", "/assets/reviews/elena-svetlova.svg"],
-    ["ульяна реброва", "/assets/reviews/ulyana-rebrova.svg"]
-  ]);
+  const normalizeReviewQuoteText = (text) =>
+    String(text || "")
+      .replace(/\.(\s*»)/g, "$1")
+      .replace(/\.\s*$/g, "");
+
+  const defaultReviewImageMap = new Map();
+  String(defaultReviewsEntry.bodyHtml || "").replace(
+    /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
+    (_match, innerHtml) => {
+      const nameMatch = innerHtml.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
+      const imageMatch = innerHtml.match(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/i);
+      const displayName = nameMatch ? String(nameMatch[1] || "").replace(/<[^>]*>/g, "").trim().toLowerCase() : "";
+      const imageSrc = imageMatch ? String(imageMatch[1] || "").trim() : "";
+      if (displayName && imageSrc) {
+        defaultReviewImageMap.set(displayName, imageSrc);
+      }
+      return _match;
+    }
+  );
 
   const formatsMethodologyButton =
     '\n        <div class="formats-modal-actions">\n          <a class="btn btn-secondary" href="/?modal=methodology" data-modal="methodology">Узнать методологию</a>\n        </div>';
@@ -516,7 +551,7 @@ function normalizeMediaStationReviewsModal(content) {
     const rawTitle = String(entry.title || "").trim();
     const needsTitleUpgrade = rawTitle === "Участники о проекте" || rawTitle === "Отзывы участников";
 
-    // No review cards at all — restore the default (which now includes speaker photos).
+    // No review cards at all — restore clean default text cards.
     if (!rawBodyHtml.includes("modal-review-card")) {
       changed = true;
       return {
@@ -526,21 +561,30 @@ function normalizeMediaStationReviewsModal(content) {
       };
     }
 
-    // Ensure every known speaker card carries their photo, while preserving edited text.
+    // Preserve review photos and only normalize the text content.
     const upgradedBodyHtml = rawBodyHtml.replace(
       /<article class=["']modal-review-card(?:\s+has-media)?["']>([\s\S]*?)<\/article>/gi,
-      (match, innerHtml) => {
+      (_match, innerHtml) => {
+        const imageMatch = innerHtml.match(/<img\b[^>]*src=["']([^"']+)["'][^>]*alt=["']([^"']*)["'][^>]*>/i)
+          || innerHtml.match(/<img\b[^>]*src=["']([^"']+)["'][^>]*>/i);
+        const imageSrc = imageMatch ? String(imageMatch[1] || "").trim() : "";
         const copyHtml = innerHtml
-          .replace(/<div class=["']modal-review-media["'][^>]*>[\s\S]*?<\/div>\s*<\/div>\s*/gi, "")
+          .replace(/<div class=["']modal-review-media["'][^>]*>[\s\S]*?<\/div>\s*/gi, "")
+          .replace(/<div class=["']modal-review-avatar-empty["'][^>]*>[\s\S]*?<\/div>\s*/gi, "")
           .replace(/<div class=["']modal-review-media["'][^>]*>\s*<img\b[^>]*>\s*<\/div>\s*/gi, "")
+          .replace(
+            /(<p\b[^>]*class=["'][^"']*modal-review-text[^"']*["'][^>]*>)([\s\S]*?)(<\/p>)/gi,
+            (_match, openTag, text, closeTag) => `${openTag}${normalizeReviewQuoteText(text)}${closeTag}`
+          )
           .trim();
         const nameMatch = copyHtml.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
         const displayName = nameMatch ? nameMatch[1].replace(/<[^>]*>/g, "").trim() : "";
-        const photo = reviewPhotoByName.get(displayName.toLowerCase());
-        if (!photo) {
+        const normalizedName = displayName.toLowerCase();
+        const effectiveImageSrc = imageSrc || defaultReviewImageMap.get(normalizedName) || "";
+        if (!effectiveImageSrc) {
           return `<article class="modal-review-card">${copyHtml}</article>`;
         }
-        const media = `<div class="modal-review-media"><img src="${photo}" alt="${displayName}" loading="lazy"></div>`;
+        const media = `<div class="modal-review-media"><img src="${effectiveImageSrc}" alt="${displayName}" loading="lazy"></div>`;
         return `<article class="modal-review-card has-media">${media}${copyHtml}</article>`;
       }
     );
@@ -870,12 +914,16 @@ function queueRemoteDraftSync(snapshotDraft) {
     })
       .then((result) => {
         if (result?.ok && result.payload?.state) {
+          lastDraftSyncError = null;
           cacheStateRaw(normalizeState(result.payload.state));
           return result.payload.state;
         }
         return null;
       })
-      .catch(() => null);
+      .catch((error) => {
+        notifyDraftSyncError(error);
+        return null;
+      });
   }, REMOTE_DRAFT_SYNC_DELAY_MS);
 }
 
@@ -898,20 +946,27 @@ export async function flushDraftSync() {
           allowUnauthorized: true
         });
         if (result?.ok && result.payload?.state) {
+          lastDraftSyncError = null;
           const normalized = normalizeState(result.payload.state);
           cacheStateRaw(normalized);
           return normalized;
         }
-      } catch {
-        // keep local draft cache when remote not reachable
+      } catch (error) {
+        notifyDraftSyncError(error);
+        throw error;
       }
     }
   }
 
   try {
     await draftSyncPromise;
-  } catch {
-    // no-op
+  } catch (error) {
+    notifyDraftSyncError(error);
+    throw error;
+  }
+
+  if (lastDraftSyncError) {
+    throw lastDraftSyncError;
   }
 
   return loadCmsState();
